@@ -4,10 +4,14 @@ service: meter-anomaly-cron
 
 frameworkVersion: '3'
 
+plugins:
+  - serverless-plugin-typescript
 
 provider:
   name: aws
   runtime: nodejs14.x
+  environment:
+    EMCS_API_KEY: ${param:emcs-api-key}
 
 functions:
   rateHandler:
