@@ -14,13 +14,8 @@ provider:
     EMCS_API_KEY: ${param:emcs-api-key}
 
 functions:
-  rateHandler:
-    handler: handler.run
-    events:
-      # Invoke Lambda function every minute
-      - schedule: rate(1 minute)
   cronHandler:
     handler: handler.run
     events:
-      # Invoke Lambda function every 2nd minute from Mon-Fri
-      - schedule: cron(0/2 * ? * MON-FRI *)
+      # Invoke Lambda function every top of the hour
+      - schedule: cron(0 * ? * * *)
