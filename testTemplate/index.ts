@@ -1,4 +1,9 @@
+// index.ts
 
-export default async function run(pointName: string){
-    throw new Error("Not Implemented Yet");
+import { Algorithm } from "../types";
+
+const run: Algorithm = async (pointName: string) => {
+  throw new Error("Not Implemented Yet");
 };
+
+export default run;
