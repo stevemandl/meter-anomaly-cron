@@ -1,10 +1,10 @@
 // handler.test.ts
 import axios from "axios";
-import { run, fetchPoints } from "../handler";
+import { run, fetchPoints, auth } from "../handler";
 
 jest.mock("axios");
 const mockedAxios = jest.mocked(axios);
-test("correct greeting is generated", async () => {
+test("object list is returned", async () => {
   const objList = {
     status: "in-service",
     name: "MeterAnomaly.Test.PointList",
@@ -19,4 +19,12 @@ test("correct greeting is generated", async () => {
     },
   };
   expect(await fetchPoints(cfg)).toBe(objList.objectList);
+});
+
+test("authorizer works", async ()=>{
+  process.env.SECRET_TOKEN = "testSecret";
+  const event = {headers: {
+    authorization: process.env.SECRET_TOKEN
+  }}
+  expect((await auth(event)).isAuthorized)
 });

@@ -12,10 +12,18 @@ provider:
   runtime: nodejs14.x
   environment:
     EMCS_API_KEY: ${param:emcs-api-key}
+    SECRET_TOKEN: ${param:SECRET_TOKEN, '3XReeWlkXZRS1ZnE33DDth'}
+    PORTAL_API_URL: 'https://portal-api.emcs.cucloud.net/'
 
 functions:
+  auth:
+    handler: handler.auth
   cronHandler:
     handler: handler.run
     events:
       # Invoke Lambda function every top of the hour
       - schedule: cron(0 * ? * * *)
+  testTemplateHandler:
+    handler: testTemplate.run
+    url: true
+    authorizer: auth

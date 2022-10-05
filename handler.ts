@@ -5,6 +5,7 @@ import testTemplate from "./testTemplate";
 import { AlgorithmCfg, ObjList } from "./types";
 
 const API_KEY: string | undefined = process.env.EMCS_API_KEY;
+const SECRET_TOKEN: string | undefined = process.env.SECRET_TOKEN;
 
 function emcsURL(point: string) {
   return `https://www.emcs.cornell.edu/${point}?api=${API_KEY}&cmd=json`;
@@ -23,6 +24,13 @@ export async function fetchPoints(cfg: AlgorithmCfg) {
   return data.objectList;
 }
 
+// auth()
+// simple authorizer
+export async function auth(event) {
+  const isAuthorized = event.headers.authorization === SECRET_TOKEN;
+  return { isAuthorized };
+}
+
 // run()
 // main entry point for the cron runner
 export async function run(event, context, callback) {
@@ -36,9 +44,8 @@ export async function run(event, context, callback) {
       return objectList.map((point) => cfg.fn(point));
     })
     .flat(2);
-  Promise.allSettled(tasks)
-    .then((values) => {
-      console.log(`All tasks completed at ${new Date()}`);
-      console.log(`Values: ${JSON.stringify(values)}`);
-    });
+  Promise.allSettled(tasks).then((values) => {
+    console.log(`All tasks completed at ${new Date()}`);
+    console.log(`Values: ${JSON.stringify(values)}`);
+  });
 }
