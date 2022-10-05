@@ -39,6 +39,6 @@ export async function run(event, context, callback) {
   Promise.allSettled(tasks)
     .then((values) => {
       console.log(`All tasks completed at ${new Date()}`);
-      console.log(`Values: ${values}`);
+      console.log(`Values: ${JSON.stringify(values)}`);
     });
 }
