@@ -1,65 +1,18 @@
 <!--
-title: 'AWS Node Scheduled Cron example in NodeJS'
-description: 'This is an example of creating a function that runs as a cron job using the serverless ''schedule'' event.'
+title: 'Meter Anomaly Cron scheduler'
+description: 'This is a cron scheduler for running anomaly detection functions on a schedule, and compiling the anomalies into a report.'
 layout: Doc
 framework: v3
 platform: AWS
 language: nodeJS
 priority: 1
-authorLink: 'https://github.com/0dj0bz'
-authorName: 'Rob Abbott'
-authorAvatar: 'https://avatars3.githubusercontent.com/u/5679763?v=4&s=140'
+authorName: 'Steve Mandl'
+authorAvatar: 'https://secure.gravatar.com/avatar/d3fe459f8114ad905d54de551e44e4f0?s=800&d=identicon'
 -->
 
 # Serverless Framework Node Scheduled Cron on AWS
 
-This template demonstrates how to develop and deploy a simple cron-like service running on AWS Lambda using the traditional Serverless Framework.
-
-## Schedule event type
-
-This examples defines two functions, `cron` and `secondCron`, both of which are triggered by an event of `schedule` type, which is used for configuring functions to be executed at specific time or in specific intervals. For detailed information about `schedule` event, please refer to corresponding section of Serverless [docs](https://serverless.com/framework/docs/providers/aws/events/schedule/).
-
-When defining `schedule` events, we need to use `rate` or `cron` expression syntax.
-
-### Rate expressions syntax
-
-```pseudo
-rate(value unit)
-```
-
-`value` - A positive number
-
-`unit` - The unit of time. ( minute | minutes | hour | hours | day | days )
-
-In below example, we use `rate` syntax to define `schedule` event that will trigger our `rateHandler` function every minute
-
-```yml
-functions:
-  rateHandler:
-    handler: handler.run
-    events:
-      - schedule: rate(1 minute)
-```
-
-Detailed information about rate expressions is available in official [AWS docs](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html#RateExpressions).
-
-
-### Cron expressions syntax
-
-```pseudo
-cron(Minutes Hours Day-of-month Month Day-of-week Year)
-```
-
-All fields are required and time zone is UTC only.
-
-| Field         | Values         | Wildcards     |
-| ------------- |:--------------:|:-------------:|
-| Minutes       | 0-59           | , - * /       |
-| Hours         | 0-23           | , - * /       |
-| Day-of-month  | 1-31           | , - * ? / L W |
-| Month         | 1-12 or JAN-DEC| , - * /       |
-| Day-of-week   | 1-7 or SUN-SAT | , - * ? / L # |
-| Year          | 192199      | , - * /       |
+This project is for developing and deploying simple cron-like service running on AWS Lambda using the traditional Serverless Framework.
 
 In below example, we use `cron` syntax to define `schedule` event that will trigger our `cronHandler` function every second minute every Monday through Friday
 
@@ -76,46 +29,77 @@ Detailed information about cron expressions in available in official [AWS docs](
 
 ## Usage
 
+Node and npm are required for testing. See https://docs.npmjs.com/downloading-and-installing-node-js-and-npm for installation instructions.
+
+Run `npm install` prior to use.
+
+Serverless framework is required for local invocation and offline emulation. Run `npm i -g serverless` to install serverless. See https://www.serverless.com/console/docs
+
+A code editor such as Visual Studio Code is recommended. See https://code.visualstudio.com/docs for information about vscode.
 ### Deployment
 
-This example is made to work with the Serverless Framework dashboard, which includes advanced features such as CI/CD, monitoring, metrics, etc.
-
-In order to deploy with dashboard, you need to first login with:
-
-```
-serverless login
-```
-
-and then perform deployment with:
-
-```
-serverless deploy
-```
-
-After running deploy, you should see output similar to:
-
-```bash
-Deploying aws-node-scheduled-cron-project to stage dev (us-east-1)
-
-✔ Service deployed to stack aws-node-scheduled-cron-project-dev (205s)
-
-functions:
-  rateHandler: aws-node-scheduled-cron-project-dev-rateHandler (2.9 kB)
-  cronHandler: aws-node-scheduled-cron-project-dev-cronHandler (2.9 kB)
-```
-
-There is no additional step required. Your defined schedules becomes active right away after deployment.
+This project made to deploy with the Github CI/CD framework. 
 
 ### Local invocation
 
 In order to test out your functions locally, you can invoke them with the following command:
 
 ```
-serverless invoke local --function rateHandler
+serverless invoke local --function cronHandler
 ```
 
 After invocation, you should see output similar to:
 
 ```bash
-Your cron function "aws-node-scheduled-cron-dev-rateHandler" ran at Fri Mar 05 2021 15:14:39 GMT+0100 (Central European Standard Time)
+Running "serverless" from node_modules
+Compiling with Typescript...
+Using local tsconfig.json - tsconfig.json
+Typescript compiled.
+Handler ran at Fri Oct 07 2022 09:07:22 GMT-0400 (Eastern Daylight Time)
+Report:
+ testTemplate: MannLibrary.STM.M22-V/AverageMassFlow has no data for the period Wed Sep 07 2022 13:07:19 GMT+0000 (Coordinated Universal Time) to Fri Oct 07 2022 13:07:19 GMT+0000 (Coordinated Universal Time)
+
+```
+
+### Offline emulation
+
+If you want to invoke your functions through a lambda-like endpoint from a client that would be making webservice requests to the API gateway, use:
+
+```bash
+$ serverless offline
+```
+
+After starting serverless offline, you should see output like:
+
+```
+Running "serverless" from node_modules
+Compiling with Typescript...
+Using local tsconfig.json - tsconfig.json
+Typescript compiled.
+Watching typescript files...
+
+Starting Offline at stage dev (us-east-1)
+
+Offline [http for lambda] listening on http://localhost:3002
+Function names exposed for local invocation by aws-sdk:
+           * cronHandler: meter-anomaly-cron-dev-cronHandler
+           * testTemplateHandler: meter-anomaly-cron-dev-testTemplateHandler
+Scheduling [cronHandler] cron: [0 * ? * *]
+Remember to use 'x-api-key' on the request headers.
+Key with token: 'd41d8cd98f00b204e9800998ecf8427e'
+
+   ┌───────────────────────────────────────────────────────────────────────────────────────┐
+   │                                                                                       │
+   │   POST | http://localhost:3000/dev/testTemplate                                       │
+   │   POST | http://localhost:3000/2015-03-31/functions/testTemplateHandler/invocations   │
+   │                                                                                       │
+   └───────────────────────────────────────────────────────────────────────────────────────┘
+
+Server ready: http://localhost:3000 🚀
+```
+
+Then you should be able to send a request from a separate terminal to the offline service like this:
+```bash
+$ curl -X POST http://localhost:3000/dev/testTemplate -H 'x-api-key: dev-yqiOpWb6095s097Roybo2793yHXGNWFx6oWCVvvv'  \
+-d '{"pointName": "KlarmanHall.Elec.Solar.PowerScout3037/kW_System"}'
 ```

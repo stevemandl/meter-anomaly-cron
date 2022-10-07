@@ -6,16 +6,41 @@ frameworkVersion: '3'
 
 plugins:
   - serverless-plugin-typescript
-
+  - serverless-offline
+custom:
+  SECRET_TOKEN: ${sls:stage}-${param:SECRET_TOKEN, 'yqiOpWb6095s097Roybo2793yHXGNWFx6oWCVvvv'}
 provider:
   name: aws
   runtime: nodejs14.x
   environment:
     EMCS_API_KEY: ${param:emcs-api-key}
-
+    SECRET_TOKEN: ${self:custom.SECRET_TOKEN}
+    PORTAL_API_URL: 'https://portal-api.emcs.cucloud.net/'
+    FUNCTION_BASE_URL: ${param:FUNCTION_BASE_URL, 'https://ev2hh4xxsa.execute-api.us-east-1.amazonaws.com/${sls:stage}/'}
+  apiGateway:
+    apiKeys:
+      - value: ${self:custom.SECRET_TOKEN}
+    request:
+      schemas:
+        alg-param-model:
+          name: AlgCreateModel
+          schema: ${file(alg_request.json)}
+          description: "A Model validation for calling algorithms"
 functions:
   cronHandler:
     handler: handler.run
     events:
       # Invoke Lambda function every top of the hour
-      - schedule: cron(0 * ? * * *)
+      - schedule: cron(0/1 * ? * * *)
+  testTemplateHandler:
+    handler: testTemplate/handler.run
+    events:
+      - http:
+          path: testTemplate
+          method: post
+          cors: true
+          private: true
+          request:
+            schemas:
+              application/json: alg-param-model
+      
