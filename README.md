@@ -29,22 +29,36 @@ Detailed information about cron expressions in available in official [AWS docs](
 
 ## Usage
 
+Node and npm are required for testing. See https://docs.npmjs.com/downloading-and-installing-node-js-and-npm for installation instructions.
+
+Run `npm install` prior to use.
+
+Serverless framework is required for local invocation and offline emulation. Run `npm i -g serverless` to install serverless. See https://www.serverless.com/console/docs
+
+A code editor such as Visual Studio Code is recommended. See https://code.visualstudio.com/docs for information about vscode.
 ### Deployment
 
-This project made to deploy work with the Github CI/CD framework. 
+This project made to deploy with the Github CI/CD framework. 
 
 ### Local invocation
 
 In order to test out your functions locally, you can invoke them with the following command:
 
 ```
-serverless invoke local --function rateHandler
+serverless invoke local --function cronHandler
 ```
 
 After invocation, you should see output similar to:
 
 ```bash
-Your cron function "aws-node-scheduled-cron-dev-rateHandler" ran at Fri Mar 05 2021 15:14:39 GMT+0100 (Central European Standard Time)
+Running "serverless" from node_modules
+Compiling with Typescript...
+Using local tsconfig.json - tsconfig.json
+Typescript compiled.
+Handler ran at Fri Oct 07 2022 09:07:22 GMT-0400 (Eastern Daylight Time)
+Report:
+ testTemplate: MannLibrary.STM.M22-V/AverageMassFlow has no data for the period Wed Sep 07 2022 13:07:19 GMT+0000 (Coordinated Universal Time) to Fri Oct 07 2022 13:07:19 GMT+0000 (Coordinated Universal Time)
+
 ```
 
 ### Offline emulation
@@ -55,7 +69,7 @@ If you want to invoke your functions through a lambda-like endpoint from a clien
 $ serverless offline
 ```
 
-After starting, you should see output like:
+After starting serverless offline, you should see output like:
 
 ```
 Running "serverless" from node_modules
@@ -84,7 +98,7 @@ Key with token: 'd41d8cd98f00b204e9800998ecf8427e'
 Server ready: http://localhost:3000 🚀
 ```
 
-Then you should be able to send a request to the offline service like this:
+Then you should be able to send a request from a separate terminal to the offline service like this:
 ```bash
 $ curl -X POST http://localhost:3000/dev/testTemplate -H 'x-api-key: dev-yqiOpWb6095s097Roybo2793yHXGNWFx6oWCVvvv'  \
 -d '{"pointName": "KlarmanHall.Elec.Solar.PowerScout3037/kW_System"}'

@@ -40,7 +40,6 @@ export async function auth(event) {
 // invoke lambda function
 export async function invokeLambda(uri: string, pointName: string) {
   //TODO: rewrite to invoke lambda using AWS SDK
-  console.log(`invokeLambda uri: ${uri} point: ${pointName}`);
   const cfg: AxiosRequestConfig = {
     data: { pointName },
     url: `${FUNCTION_BASE_URL}${uri}`,
