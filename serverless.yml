@@ -31,7 +31,7 @@ functions:
     handler: handler.run
     events:
       # Invoke Lambda function every top of the hour
-      - schedule: cron(0/1 * ? * * *)
+      - schedule: cron(0 * ? * * *)
   testTemplateHandler:
     handler: testTemplate/handler.run
     events:
