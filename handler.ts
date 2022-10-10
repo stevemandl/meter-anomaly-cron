@@ -1,7 +1,7 @@
 // handler.ts
 import axios from "axios";
 import { AlgorithmCfg, ObjList } from "./types";
-import { Lambda } from "aws-sdk";
+import { Lambda, SNS } from "aws-sdk";
 
 const API_KEY: string | undefined = process.env.EMCS_API_KEY;
 const SECRET_TOKEN: string | undefined = process.env.SECRET_TOKEN;
@@ -95,7 +95,18 @@ export async function run(event, context) {
         return r.reason;
       }
     })
+    .sort()
     .join("\n");
-    // TODO: make this pretty and deliver it to an e-mail list using SNS
-  console.log(`Report:\n ${report}`);
+    // make this pretty and deliver it to an e-mail list using SNS:
+    // Create publish parameters
+    var params = {
+      Message: `Meter Anomaly Report for ${time.toLocaleString()}:\n${report}`, /* required */
+      TopicArn: 'arn:aws:sns:us-east-1:498547149247:emcs-meter-anomalies'
+    };
+    // create SNS service object
+    const sns = new SNS({apiVersion: '2010-03-31'});
+    // Await promise
+    var publishText = await sns.publish(params).promise();
+    // Handle promise's fulfilled/rejected states
+    console.log("Report MessageID is " + publishText.MessageId);
 }
