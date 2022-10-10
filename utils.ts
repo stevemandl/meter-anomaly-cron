@@ -15,20 +15,26 @@ const axiosInstance = axios.create({
 // takes an event passed from the API gateway, returns the params that are useful to the algorithm
 // this is where the generic pre-processing and validation of the parameters should be done,
 // so the algorithms can assume a valid date and a pointName that is a string
-export const parseEvent: (event: { body: string }) => AlgParams = (event) => {
-  let { pointName, timeStamp } = JSON.parse(event.body);
-  if (timeStamp) {
+export const parseEvent: (event: { body: string|object }) => AlgParams = (event) => {
+  var body;
+  if (typeof(event.body)=='string'){
+    body = JSON.parse(event.body);
+  }else if (typeof(event.body)=='object'){
+    body = event.body;
+  }
+  console.log(`    body: ${JSON.stringify(body)}`);
+  if (body.timeStamp) {
     // make a Date from the timestamp
-    timeStamp = new Date(timeStamp);
+    body.timeStamp = new Date(body.timeStamp);
   } else {
     // default to now
-    timeStamp = new Date();
+    body.timeStamp = new Date();
   }
-  if (isNaN(timeStamp.valueOf())) {
+  if (isNaN(body.timeStamp.valueOf())) {
     // the algorithms can't work with invalid dates
     throw new Error("Invalid timeStamp");
   }
-  return { pointName, timeStamp };
+  return body;
 };
 
 // fetchTrends

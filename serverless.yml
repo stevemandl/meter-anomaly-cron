@@ -16,16 +16,7 @@ provider:
     EMCS_API_KEY: ${param:emcs-api-key}
     SECRET_TOKEN: ${self:custom.SECRET_TOKEN}
     PORTAL_API_URL: 'https://portal-api.emcs.cucloud.net/'
-    FUNCTION_BASE_URL: ${param:FUNCTION_BASE_URL, 'https://ev2hh4xxsa.execute-api.us-east-1.amazonaws.com/${sls:stage}/'}
-  apiGateway:
-    apiKeys:
-      - value: ${self:custom.SECRET_TOKEN}
-    request:
-      schemas:
-        alg-param-model:
-          name: AlgCreateModel
-          schema: ${file(alg_request.json)}
-          description: "A Model validation for calling algorithms"
+    FUNCTION_BASE: ${param:FUNCTION_BASE, 'meter-anomaly-cron-${sls:stage}-'}
 functions:
   cronHandler:
     handler: handler.run
@@ -34,13 +25,3 @@ functions:
       - schedule: cron(0 * ? * * *)
   testTemplateHandler:
     handler: testTemplate/handler.run
-    events:
-      - http:
-          path: testTemplate
-          method: post
-          cors: true
-          private: true
-          request:
-            schemas:
-              application/json: alg-param-model
-      
