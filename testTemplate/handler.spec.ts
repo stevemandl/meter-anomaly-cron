@@ -1,9 +1,9 @@
 // testTemplate/handler.test.ts
-import { run } from "../../testTemplate/handler";
-import * as utils from "../../utils";
+import { run } from "./handler";
+import * as utils from "../utils";
 
-jest.mock("../../utils", () => {
-  const originalUtils = jest.requireActual("../../utils");
+jest.mock("../utils", () => {
+  const originalUtils = jest.requireActual("../utils");
   return {
     __esModule: true,
     ...originalUtils,

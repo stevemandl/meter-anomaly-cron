@@ -1,10 +1,19 @@
 // handler.ts
-import axios, { AxiosRequestConfig } from "axios";
+import axios from "axios";
 import { AlgorithmCfg, ObjList } from "./types";
+import { Lambda } from "aws-sdk";
 
 const API_KEY: string | undefined = process.env.EMCS_API_KEY;
 const SECRET_TOKEN: string | undefined = process.env.SECRET_TOKEN;
-const FUNCTION_BASE_URL: string | undefined = process.env.FUNCTION_BASE_URL;
+const FUNCTION_BASE: string | undefined = process.env.FUNCTION_BASE;
+
+// when running offline, use the localhost endpoint
+const lambda = new Lambda({
+  apiVersion: "2015-03-31",
+  endpoint: process.env.IS_OFFLINE
+    ? "http://localhost:3002"
+    : "https://lambda.us-east-1.amazonaws.com",
+});
 
 // forms the URL for the EMCS API that returns the json representation of an object
 function emcsURL(point: string) {
@@ -13,8 +22,9 @@ function emcsURL(point: string) {
 
 // the configuration of the various algorithms with the objListPoint containing the list of meters for this algorithm,
 // and the fn name indicating the path relative to the base URL for the lambda functions
+// TODO: store this externally
 const algorithms: AlgorithmCfg[] = [
-  { objListPoint: "MeterAnomaly.Test.PointList", fn: "testTemplate" },
+  { objListPoint: "MeterAnomaly.Test.PointList", fn: "testTemplateHandler" },
 ];
 
 // fetchPoints(cfg)
@@ -29,30 +39,20 @@ export async function fetchPoints(cfg: AlgorithmCfg): Promise<string[]> {
   return objArray;
 }
 
-// auth()
-// simple authorizer checks if the x-api-key header matches the SECRET_TOKEN
-export async function auth(event) {
-  const isAuthorized = event.headers.authorization === SECRET_TOKEN;
-  return { isAuthorized };
-}
-
 // invokeLambda()
 // invoke lambda function
 export async function invokeLambda(uri: string, pointName: string) {
-  //TODO: rewrite to invoke lambda using AWS SDK
-  const cfg: AxiosRequestConfig = {
-    data: { pointName },
-    url: `${FUNCTION_BASE_URL}${uri}`,
-    timeout: 30000,
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": SECRET_TOKEN,
-    },
-    method: "post",
+  const params: Lambda.InvocationRequest = {
+    FunctionName: `${FUNCTION_BASE}${uri}`,
+    InvocationType: "RequestResponse",
+    Payload: JSON.stringify({ body: { pointName } }),
   };
   try {
-    let response = await axios.request<string>(cfg);
-    return response.data;
+    const response: Lambda.InvocationResponse = await lambda
+      .invoke(params)
+      .promise();
+    const responseBody = JSON.parse("" + response.Payload?.toString());
+    return responseBody.body;
   } catch (error) {
     return `axios error invoking lambda: ${error.message}`;
   }
@@ -78,7 +78,9 @@ export async function run(event, context) {
     lambdaParams.map(async (param) => {
       const lambdaResult = await invokeLambda(param.uri, param.pointName);
       // prepend the function name to the results to be consistent
-      return lambdaResult ? `${param.uri}: ${lambdaResult}` : null;
+      return lambdaResult
+        ? `${param.uri}:${param.pointName} ${lambdaResult}`
+        : null;
     })
   );
   //make the report

@@ -13,7 +13,7 @@ export const run: Algorithm = async (event) => {
   // default response has empty body
   let response = { statusCode: 200, body: "" };
   const now = new Date();
-  console.log(`testTemplate run at ${now}`);
+  console.log(`testTemplate run at ${now.toLocaleString()}`);
   // parse and validate the parameters out of the API gateway event
   const params: AlgParams = parseEvent(event);
   // endTime defaults to now, overridden if a timeStamp is passed to the lambda call

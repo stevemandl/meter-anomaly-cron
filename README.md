@@ -12,7 +12,10 @@ authorAvatar: 'https://secure.gravatar.com/avatar/d3fe459f8114ad905d54de551e44e4
 
 # Serverless Framework Node Scheduled Cron on AWS
 
-This project is for developing and deploying simple cron-like service running on AWS Lambda using the traditional Serverless Framework.
+This project is for developing and deploying simple cron-like service running on AWS Lambda using the traditional Serverless framework. 
+The service passes anomaly detection functions meter names that have been configured to run with these functions. 
+The functions apply a specific anomaly detection algorithm, and return a description of the anomaly detected only if detection occurs.
+
 
 In below example, we use `cron` syntax to define `schedule` event that will trigger our `cronHandler` function every second minute every Monday through Friday
 
@@ -29,16 +32,37 @@ Detailed information about cron expressions in available in official [AWS docs](
 
 ## Usage
 
+Use git to clone a local copy of this repository. Development work should be done on dev branches associated with a repository issue. Please do not make changes to the dev or main branches. Ask Steve if you have questions about how to create, check out, commit changes, and push to dev branches.
+
+A template 
+
 Node and npm are required for testing. See https://docs.npmjs.com/downloading-and-installing-node-js-and-npm for installation instructions.
 
-Run `npm install` prior to use.
+### Install Dependencies
+Serverless framework is required for local invocation and offline emulation. See https://www.serverless.com/console/docs
 
-Serverless framework is required for local invocation and offline emulation. Run `npm i -g serverless` to install serverless. See https://www.serverless.com/console/docs
-
+Install serverless globally:
+```
+npm i -g serverless
+```
+Install other dependencies into the project directory from the base directory prior to use:
+```
+npm install
+```
+ 
+### Tools
 A code editor such as Visual Studio Code is recommended. See https://code.visualstudio.com/docs for information about vscode.
+
+When working with AWS resources, the AWS CLI is useful. See https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html 
+
+### Testing
+
+```
+npm test
+```
 ### Deployment
 
-This project made to deploy with the Github CI/CD framework. 
+This project made to deploy with the Github CI/CD framework. Testing actions are automatically run against dev branches on push events. Deployment is automatically run on merges into the dev or main branches.
 
 ### Local invocation
 
@@ -85,21 +109,9 @@ Function names exposed for local invocation by aws-sdk:
            * cronHandler: meter-anomaly-cron-dev-cronHandler
            * testTemplateHandler: meter-anomaly-cron-dev-testTemplateHandler
 Scheduling [cronHandler] cron: [0 * ? * *]
-Remember to use 'x-api-key' on the request headers.
-Key with token: 'd41d8cd98f00b204e9800998ecf8427e'
-
-   ┌───────────────────────────────────────────────────────────────────────────────────────┐
-   │                                                                                       │
-   │   POST | http://localhost:3000/dev/testTemplate                                       │
-   │   POST | http://localhost:3000/2015-03-31/functions/testTemplateHandler/invocations   │
-   │                                                                                       │
-   └───────────────────────────────────────────────────────────────────────────────────────┘
-
-Server ready: http://localhost:3000 🚀
 ```
 
 Then you should be able to send a request from a separate terminal to the offline service like this:
 ```bash
-$ curl -X POST http://localhost:3000/dev/testTemplate -H 'x-api-key: dev-yqiOpWb6095s097Roybo2793yHXGNWFx6oWCVvvv'  \
--d '{"pointName": "KlarmanHall.Elec.Solar.PowerScout3037/kW_System"}'
+$ aws lambda invoke --endpoint-url http://localhost:3002 --function-name meter-anomaly-cron-dev-testTemplateHandler --payload '{"body": { "pointName": "AppelCommons.CW.FP/TONS" }}' response.json
 ```
