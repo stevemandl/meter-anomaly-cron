@@ -3,26 +3,20 @@ import { AlgParams, TrendArray, TrendResponse } from "./types";
 
 export const PORTAL_API_URL: string | undefined = process.env.PORTAL_API_URL;
 const queryUrl = `${PORTAL_API_URL}query`;
-const axiosInstance = axios.create({
-  baseURL: queryUrl,
-  timeout: 3000,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
 
 // parseEvent
-// takes an event passed from the API gateway, returns the params that are useful to the algorithm
+// takes an event passed to the lambda function, returns the params that are useful to the algorithm
 // this is where the generic pre-processing and validation of the parameters should be done,
 // so the algorithms can assume a valid date and a pointName that is a string
-export const parseEvent: (event: { body: string|object }) => AlgParams = (event) => {
+export const parseEvent: (event: { body: string | object }) => AlgParams = (
+  event
+) => {
   var body;
-  if (typeof(event.body)=='string'){
+  if (typeof event.body == "string") {
     body = JSON.parse(event.body);
-  }else if (typeof(event.body)=='object'){
+  } else if (typeof event.body == "object") {
     body = event.body;
   }
-  console.log(`    body: ${JSON.stringify(body)}`);
   if (body.timeStamp) {
     // make a Date from the timestamp
     body.timeStamp = new Date(body.timeStamp);
@@ -61,9 +55,11 @@ export const fetchTrends: (
     };
   let trendResponse: TrendResponse = {};
   // await the raw response
-  const response = await axiosInstance.request<TrendArray>({
-    data: requestData,
-    method: "post",
+  const response = await axios.post<TrendArray>(queryUrl, requestData, {
+    timeout: 3000,
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
   if (response && response.data) {
     trendResponse.data = response.data;

@@ -96,5 +96,6 @@ export async function run(event, context) {
       }
     })
     .join("\n");
+    // TODO: make this pretty and deliver it to an e-mail list using SNS
   console.log(`Report:\n ${report}`);
 }

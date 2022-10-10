@@ -7,16 +7,13 @@ frameworkVersion: '3'
 plugins:
   - serverless-plugin-typescript
   - serverless-offline
-custom:
-  SECRET_TOKEN: ${sls:stage}-${param:SECRET_TOKEN, 'yqiOpWb6095s097Roybo2793yHXGNWFx6oWCVvvv'}
 provider:
   name: aws
-  runtime: nodejs14.x
+  runtime: nodejs16.x
   environment:
     EMCS_API_KEY: ${param:emcs-api-key}
-    SECRET_TOKEN: ${self:custom.SECRET_TOKEN}
     PORTAL_API_URL: 'https://portal-api.emcs.cucloud.net/'
-    FUNCTION_BASE: ${param:FUNCTION_BASE, 'meter-anomaly-cron-${sls:stage}-'}
+    FUNCTION_BASE: ${param:FUNCTION_BASE, '${self:app}-${sls:stage}-'}
 functions:
   cronHandler:
     handler: handler.run
