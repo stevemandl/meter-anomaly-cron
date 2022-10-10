@@ -34,10 +34,7 @@ Detailed information about cron expressions in available in official [AWS docs](
 
 Use git to clone a local copy of this repository. Development work should be done on dev branches associated with a repository issue. Please do not make changes to the dev or main branches. Ask Steve if you have questions about how to create, check out, commit changes, and push to dev branches.
 
-A template 
-
 Node and npm are required for testing. See https://docs.npmjs.com/downloading-and-installing-node-js-and-npm for installation instructions.
-
 ### Install Dependencies
 Serverless framework is required for local invocation and offline emulation. See https://www.serverless.com/console/docs
 
@@ -49,7 +46,6 @@ Install other dependencies into the project directory from the base directory pr
 ```
 npm install
 ```
- 
 ### Tools
 A code editor such as Visual Studio Code is recommended. See https://code.visualstudio.com/docs for information about vscode.
 
@@ -60,6 +56,15 @@ When working with AWS resources, the AWS CLI is useful. See https://docs.aws.ama
 ```
 npm test
 ```
+### Developing new algorithms
+ - Start by creating an issue in the repo to track the development. Assign any developers that will be working on the issue tasks. 
+ - Create a dev branch from the issue and check out this branch in your development environment.
+ - From a dev branch, create a new directory for the algorithm handler. The testTemplate/* is designed to be copied into a new directory and modified 
+with the implementation of the new algorithm. (The testTemplate is typescript. If you want to work in python, the template functionality will need to be duplicated)
+ - The spec file should test the function in the same directory, and should provide at least 90% test coverage as a rule of thumb. 
+ - Once ready for review, push all code to the dev branch, and label the issue as review.
+ - To deploy, a new function will need to be added to the serverless.yml and an entry added to the algorithms array in the root handler. 
+ - In order to apply the algorithms to points, an object list will need to be created in the EMCS with the corresponding points.
 ### Deployment
 
 This project made to deploy with the Github CI/CD framework. Testing actions are automatically run against dev branches on push events. Deployment is automatically run on merges into the dev or main branches.
