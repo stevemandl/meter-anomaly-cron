@@ -22,3 +22,6 @@ functions:
       - schedule: cron(0 * ? * * *)
   testTemplateHandler:
     handler: testTemplate/handler.run
+  pythonTemplate:
+    handler: python_template/handler.run
+    runtime: python3.8
