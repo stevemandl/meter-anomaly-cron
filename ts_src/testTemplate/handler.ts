@@ -7,7 +7,7 @@
 *******/
 
 import { Algorithm, AlgParams, TrendResponse } from "../types";
-import { parseEvent, fetchTrends } from "../utils";
+import { parseEvent, fetchTrends } from "../tslib/utils";
 
 export const run: Algorithm = async (event) => {
   // default response has empty body
