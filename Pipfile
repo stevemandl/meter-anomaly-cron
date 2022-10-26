@@ -1,0 +1,16 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+requests = "*"
+python-dateutil = "*"
+
+[dev-packages]
+pytest = {version=">=6.2"}
+pytest-cov = {version=">=2.12"}
+pytest-mock = "*"
+
+[requires]
+python_version = "3.9"
