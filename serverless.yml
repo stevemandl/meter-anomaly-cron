@@ -12,7 +12,7 @@ custom:
   pythonRequirements:
     dockerizePip: true
     usePipenv: true
-    pythonBin: python3.9
+    dockerImage: lambci/lambda:build-python3.8
     
 provider:
   name: aws
