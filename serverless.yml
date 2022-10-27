@@ -7,6 +7,12 @@ frameworkVersion: '3'
 plugins:
   - serverless-plugin-typescript
   - serverless-offline
+  - serverless-python-requirements
+custom:
+  pythonRequirements:
+    dockerizePip: false
+    usePipenv: true
+    
 provider:
   name: aws
   runtime: nodejs16.x
@@ -16,9 +22,12 @@ provider:
     FUNCTION_BASE: ${param:FUNCTION_BASE, '${self:app}-${sls:stage}-'}
 functions:
   cronHandler:
-    handler: handler.run
+    handler: ts_src/cron/handler.run
     events:
       # Invoke Lambda function every top of the hour
       - schedule: cron(0 * ? * * *)
   testTemplateHandler:
-    handler: testTemplate/handler.run
+    handler: ts_src/testTemplate/handler.run
+  pythonTemplate:
+    handler: python_template/handler.run
+    runtime: python3.8
