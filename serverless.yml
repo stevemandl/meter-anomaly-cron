@@ -12,6 +12,7 @@ custom:
   pythonRequirements:
     dockerizePip: false
     usePipenv: true
+    pythonBin: python3.9
     
 provider:
   name: aws
@@ -30,4 +31,4 @@ functions:
     handler: ts_src/testTemplate/handler.run
   pythonTemplate:
     handler: python_template/handler.run
-    runtime: python3.8
+    runtime: python3.9
