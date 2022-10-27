@@ -10,7 +10,7 @@ plugins:
   - serverless-python-requirements
 custom:
   pythonRequirements:
-    dockerizePip: false
+    dockerizePip: true
     usePipenv: true
     pythonBin: python3.9
     
