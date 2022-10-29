@@ -5,6 +5,7 @@ import os
 from datetime import datetime
 from dateutil import parser
 import requests
+import math
 
 # globals
 PORTAL_API_URL = os.environ.get("PORTAL_API_URL", "/")
@@ -27,7 +28,8 @@ def parse_event(event):
         else:
             if type(ts) is int or type(ts) is float:
                 body["timeStamp"] = datetime.fromtimestamp
-            else: raise RuntimeError("invalid timeStamp")
+            else:
+                raise RuntimeError("invalid timeStamp")
     else:
         body["timeStamp"] = datetime.now()
     return body
@@ -54,7 +56,8 @@ def fetch_trends(point=None, points=None, start_time=None, end_time=datetime.now
         "targets": targets,
     }
     request_headers = {"Content-Type": "application/json"}
-    raw_response = requests.post(QUERY_URL, json=request_data, headers=request_headers)
+    raw_response = requests.post(
+        QUERY_URL, json=request_data, headers=request_headers)
     raw_response.raise_for_status()
 
     return raw_response.json()
