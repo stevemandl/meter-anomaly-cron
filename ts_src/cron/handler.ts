@@ -1,7 +1,9 @@
 // handler.ts
 import axios from "axios";
-import { AlgorithmCfg, ObjList } from "../types";
 import { Lambda, SNS } from "aws-sdk";
+import Redis from "ioredis";
+import { AlgorithmCfg, ObjList } from "../types";
+
 
 const API_KEY: string | undefined = process.env.EMCS_API_KEY;
 const SECRET_TOKEN: string | undefined = process.env.SECRET_TOKEN;
@@ -24,7 +26,8 @@ function emcsURL(point: string) {
 // and the fn name indicating the path relative to the base URL for the lambda functions
 // TODO: store this externally
 const algorithms: AlgorithmCfg[] = [
-    { objListPoint: "MeterAnomaly.Test.PointList", fn: "testTemplateHandler" },
+    { objListPoint: "MeterAnomaly.testTemplateHandler.PointList", fn: "testTemplateHandler" },
+    { objListPoint: "MeterAnomaly.pythonTemplate.PointList", fn: "pythonTemplate" },
 ];
 
 // fetchPoints(cfg)
@@ -64,6 +67,14 @@ export async function run(event, context) {
     // log the time this was called
     const time = new Date();
     console.log(`Handler ran at ${time}`);
+    const redis = new Redis({
+        port: 6379,
+        host: "redis.emcs.cucloud.net",
+        username: "cn",
+        password: "cfYRp36reQ9dNqOMmZ4Laj0w",
+        db: 0,
+      });
+    
     // create a (flattened) list of invokeLambda parameters for all of the configured algorithms
     const lambdaParams = (
         await Promise.all(
@@ -80,10 +91,20 @@ export async function run(event, context) {
     const results = await Promise.allSettled(
         lambdaParams.map(async (param) => {
             const lambdaResult = await invokeLambda(param.uri, param.pointName);
-            // prepend the function name to the results to be consistent
-            return lambdaResult
-                ? `${param.uri}:${param.pointName} ${lambdaResult}`
-                : null;
+            const invokeKey = `${param.uri}:${param.pointName}`;
+            if (lambdaResult){
+                // update elasicache state if necessary; remember when the anomaly was first detected
+                if (await redis.hsetnx("meter-anomalies", invokeKey, time.getTime())){
+                    // prepend the function name to the results to be consistent
+                    return `${invokeKey} ${lambdaResult}`;
+                }
+            }
+            else{
+                // clear anomaly
+                await redis.hdel("meter-anomalies", invokeKey);
+            }
+            await redis.quit();
+            return null;
         })
     );
     //make the report
