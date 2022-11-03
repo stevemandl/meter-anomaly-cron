@@ -1,5 +1,5 @@
 import axios from "axios";
-import { AlgParams, TrendArray, TrendResponse } from "./types";
+import { AlgParams, TrendArray, TrendResponse } from "../types";
 
 export const PORTAL_API_URL: string | undefined = process.env.PORTAL_API_URL;
 const queryUrl = `${PORTAL_API_URL}query`;
@@ -55,6 +55,7 @@ export const fetchTrends: (
     };
   let trendResponse: TrendResponse = {};
   // await the raw response
+  console.log(`posting to ${queryUrl} with ${JSON.stringify(requestData)}`)
   const response = await axios.post<TrendArray>(queryUrl, requestData, {
     timeout: 3000,
     headers: {
