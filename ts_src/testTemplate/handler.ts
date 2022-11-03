@@ -32,9 +32,7 @@ export const run: Algorithm = async (event) => {
       // 720 hours in 30 days
       // 648 is 90% of 720
       if (trends.data[0].datapoints.length < 648) {
-        response.body = `${
-          params.pointName
-        } is missing more than 10% of values for the period ${startTime.toLocaleString()} to ${endTime.toLocaleString()}`;
+        response.body = `missing more than 10% of values for the period ${startTime.toLocaleString()} to ${endTime.toLocaleString()}`;
       }
     }
     return response;
@@ -46,9 +44,7 @@ export const run: Algorithm = async (event) => {
       error.response.data &&
       error.response.data.error == "No data"
     ) {
-      response.body = `${
-        params.pointName
-      } has no data for the period ${startTime.toLocaleString()} to ${endTime.toLocaleString()}`;
+      response.body = `has no data for the period ${startTime.toLocaleString()} to ${endTime.toLocaleString()}`;
       return response;
     }
     response.body = `testTemplate caught error: ${error.message} status code: ${error.response.status}`;
