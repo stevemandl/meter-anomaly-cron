@@ -4,7 +4,7 @@ from python_lib.utils import parse_event, fetch_trends
 from datetime import datetime
 from requests.models import Response
 import pytest
-
+print(' ')
 
 def test_parse_event():
     event = {"body": {"pointName": "foo"}}
