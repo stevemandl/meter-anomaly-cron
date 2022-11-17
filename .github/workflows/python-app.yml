@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [ "dev", "main" ]
 
+defaults:
+  run:
+    shell: bash
+    working-directory: py_src
+
 jobs:
   build:
     runs-on: ubuntu-latest

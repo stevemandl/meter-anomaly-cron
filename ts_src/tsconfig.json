@@ -8,11 +8,10 @@
       "outDir": ".build",
       "moduleResolution": "node",
       "lib": ["es2017"],
-      "rootDir": "ts_src/"
+      "rootDir": "/"
     },
     "exclude": [
       "node_modules",
-      "py_src",
       "**/*.spec.ts"
     ]
   }

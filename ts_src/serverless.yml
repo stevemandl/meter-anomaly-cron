@@ -1,0 +1,25 @@
+org: sjm34
+app: meter-anomaly-detection
+service: meter-anomaly-ts
+
+frameworkVersion: '3'
+
+plugins:
+  - serverless-plugin-typescript
+  - serverless-offline
+    
+provider:
+  name: aws
+  runtime: nodejs16.x
+  environment:
+    EMCS_API_KEY: ${param:emcs-api-key, '${env:EMCS_API_KEY}'}
+    PORTAL_API_URL: 'https://portal-api.emcs.cucloud.net/'
+    SLS_STAGE: ${sls:stage, '${param:SLS_STAGE}'}
+functions:
+  cronHandler:
+    handler: cron/handler.run
+    events:
+      # Invoke Lambda function every top of the hour
+      - schedule: cron(0 * ? * * *)
+  testTemplateHandler:
+    handler: testTemplate/handler.run
