@@ -9,6 +9,7 @@ export type AlgParams = { pointName: string; timeStamp: Date };
 export type AlgorithmCfg = {
   objListPoint: string;
   fn: string;
+  service: string;
 };
 
 export type ObjList = {

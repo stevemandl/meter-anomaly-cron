@@ -4,10 +4,9 @@ import { Lambda, SNS } from "aws-sdk";
 import Redis from "ioredis";
 import { AlgorithmCfg, ObjList } from "../types";
 
-
 const API_KEY: string | undefined = process.env.EMCS_API_KEY;
 const SECRET_TOKEN: string | undefined = process.env.SECRET_TOKEN;
-const FUNCTION_BASE: string | undefined = process.env.FUNCTION_BASE;
+const SLS_STAGE: string | undefined = process.env.SLS_STAGE;
 
 // when running offline, use the localhost endpoint
 const lambda = new Lambda({
@@ -26,8 +25,16 @@ function emcsURL(point: string) {
 // and the fn name indicating the path relative to the base URL for the lambda functions
 // TODO: store this externally
 const algorithms: AlgorithmCfg[] = [
-    { objListPoint: "MeterAnomaly.testTemplateHandler.PointList", fn: "testTemplateHandler" },
-    { objListPoint: "MeterAnomaly.pythonTemplate.PointList", fn: "pythonTemplate" },
+    {
+        objListPoint: "MeterAnomaly.testTemplateHandler.PointList",
+        fn: "testTemplateHandler",
+        service: "meter-anomaly-ts",
+    },
+    {
+        objListPoint: "MeterAnomaly.pythonTemplate.PointList",
+        fn: "pythonTemplate",
+        service: "meter-anomaly-py",
+    },
 ];
 
 // fetchPoints(cfg)
@@ -44,9 +51,13 @@ export async function fetchPoints(cfg: AlgorithmCfg): Promise<string[]> {
 
 // invokeLambda()
 // invoke lambda function
-export async function invokeLambda(uri: string, pointName: string) {
+export async function invokeLambda(
+    service: string,
+    uri: string,
+    pointName: string
+) {
     const params: Lambda.InvocationRequest = {
-        FunctionName: `${FUNCTION_BASE}${uri}`,
+        FunctionName: `${service}-${SLS_STAGE}-${uri}`,
         InvocationType: "RequestResponse",
         Payload: JSON.stringify({ body: { pointName } }),
     };
@@ -67,20 +78,27 @@ export async function run(event, context) {
     // log the time this was called
     const time = new Date();
     console.log(`Handler ran at ${time}`);
-    const redis = new Redis({
+    // see https://github.com/luin/ioredis#special-note-aws-elasticache-clusters-with-tls
+    const redis = new Redis.Cluster([{
         port: 6379,
-        host: "redis.emcs.cucloud.net",
-        username: "cn",
-        password: "cfYRp36reQ9dNqOMmZ4Laj0w",
-        db: 0,
-      });
-    
+        host: "clustercfg.emcs-redis-auth.asuq5x.use1.cache.amazonaws.com",
+    }], {
+        dnsLookup: (address, cbk) => cbk(null, address),
+        redisOptions: {
+            tls: {},
+            username: "cn",
+            password: "cfYRp36reQ9dNqOMmZ4Laj0w",
+            db: 0,
+        }
+    });
+
     // create a (flattened) list of invokeLambda parameters for all of the configured algorithms
     const lambdaParams = (
         await Promise.all(
             algorithms.map(async (cfg: AlgorithmCfg) => {
                 const objectList: string[] = await fetchPoints(cfg);
                 return objectList.map((point) => ({
+                    service: cfg.service,
                     uri: cfg.fn,
                     pointName: point,
                 }));
@@ -90,16 +108,26 @@ export async function run(event, context) {
     // collect the results from all of the async lambda calls
     const results = await Promise.allSettled(
         lambdaParams.map(async (param) => {
-            const lambdaResult = await invokeLambda(param.uri, param.pointName);
+            const lambdaResult = await invokeLambda(
+                param.service,
+                param.uri,
+                param.pointName
+            );
             const invokeKey = `${param.uri}:${param.pointName}`;
-            if (lambdaResult){
+            if (lambdaResult) {
                 // update elasicache state if necessary; remember when the anomaly was first detected
-                if (await redis.hsetnx("meter-anomalies", invokeKey, time.getTime())){
+                const ts = time.getTime();
+                const hsetResult = await redis.hsetnx(
+                    "meter-anomalies",
+                    invokeKey,
+                    ts
+                )
+
+                if ( hsetResult ) {
                     // prepend the function name to the results to be consistent
                     return `${invokeKey} ${lambdaResult}`;
                 }
-            }
-            else{
+            } else {
                 // clear anomaly
                 await redis.hdel("meter-anomalies", invokeKey);
             }
@@ -121,16 +149,16 @@ export async function run(event, context) {
         })
         .sort()
         .join("\n");
-        // make this pretty and deliver it to an e-mail list using SNS:
-        // Create publish parameters
-        var params = {
-          Message: `Meter Anomaly Report for ${time.toLocaleString()}:\n${report}`, /* required */
-          TopicArn: 'arn:aws:sns:us-east-1:498547149247:emcs-meter-anomalies'
-        };
-        // create SNS service object
-        const sns = new SNS({apiVersion: '2010-03-31'});
-        // Await promise
-        var publishText = await sns.publish(params).promise();
-        // Handle promise's fulfilled/rejected states
-        console.log("Report MessageID is " + publishText.MessageId);
+    // make this pretty and deliver it to an e-mail list using SNS:
+    // Create publish parameters
+    var params = {
+        Message: `Meter Anomaly Report for ${time.toLocaleString()}:\n${report}` /* required */,
+        TopicArn: "arn:aws:sns:us-east-1:498547149247:emcs-meter-anomalies",
+    };
+    // create SNS service object
+    const sns = new SNS({ apiVersion: "2010-03-31" });
+    // Await promise
+    var publishText = await sns.publish(params).promise();
+    // Handle promise's fulfilled/rejected states
+    console.log("Report MessageID is " + publishText.MessageId);
 }
