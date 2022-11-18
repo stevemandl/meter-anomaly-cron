@@ -7,6 +7,8 @@ import { AlgorithmCfg, ObjList } from "../types";
 const API_KEY: string | undefined = process.env.EMCS_API_KEY;
 const SECRET_TOKEN: string | undefined = process.env.SECRET_TOKEN;
 const SLS_STAGE: string | undefined = process.env.SLS_STAGE;
+const REPORT_URL: string = "https://portal.emcs.cornell.edu/d/broken_meter_ticket_report/broken-meter-ticket-report";
+
 
 // when running offline, use the localhost endpoint
 const lambda = new Lambda({
@@ -147,18 +149,28 @@ export async function run(event, context) {
                 return r.reason;
             }
         })
-        .sort()
-        .join("\n");
-    // make this pretty and deliver it to an e-mail list using SNS:
-    // Create publish parameters
-    var params = {
-        Message: `Meter Anomaly Report for ${time.toLocaleString()}:\n${report}` /* required */,
-        TopicArn: "arn:aws:sns:us-east-1:498547149247:emcs-meter-anomalies",
-    };
-    // create SNS service object
-    const sns = new SNS({ apiVersion: "2010-03-31" });
-    // Await promise
-    var publishText = await sns.publish(params).promise();
-    // Handle promise's fulfilled/rejected states
-    console.log("Report MessageID is " + publishText.MessageId);
+        .sort();
+    if (report.length > 0){
+        // make this pretty and deliver it to an e-mail list using SNS:
+        // Create publish parameters
+        const Message = `Meter Anomaly Report for ${time.toLocaleString()}:
+        ${report.join("\n")}
+
+        To see the list of known anomalies, see ${REPORT_URL}.
+        To configure points assigned to anomaly detection algorithms, see https://www.emcs.cornell.edu/MeterAnomalyConfig.
+        `;
+        const params = {
+            Message,
+            TopicArn: "arn:aws:sns:us-east-1:498547149247:emcs-meter-anomalies",
+        };
+        // create SNS service object
+        const sns = new SNS({ apiVersion: "2010-03-31" });
+        // Await promise
+        var publishText = await sns.publish(params).promise();
+        // Handle promise's fulfilled/rejected states
+        console.log("Report MessageID is " + publishText.MessageId);
+    }
+    else{
+        console.log("Empty Report");
+    }
 }
