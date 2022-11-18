@@ -1,0 +1,22 @@
+org: sjm34
+app: meter-anomaly-detection
+service: meter-anomaly-py
+
+frameworkVersion: '3'
+
+plugins:
+  - serverless-offline
+  - serverless-python-requirements
+custom:
+  pythonRequirements:
+    dockerizePip: true
+    usePipenv: true
+    
+provider:
+  name: aws
+  runtime: python3.8
+  environment:
+    PORTAL_API_URL: 'https://portal-api.emcs.cucloud.net/'
+functions:
+  pythonTemplate:
+    handler: python_template/handler.run

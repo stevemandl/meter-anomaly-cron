@@ -55,7 +55,6 @@ export const fetchTrends: (
     };
   let trendResponse: TrendResponse = {};
   // await the raw response
-  console.log(`posting to ${queryUrl} with ${JSON.stringify(requestData)}`)
   const response = await axios.post<TrendArray>(queryUrl, requestData, {
     timeout: 3000,
     headers: {
