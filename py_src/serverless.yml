@@ -20,3 +20,6 @@ provider:
 functions:
   pythonTemplate:
     handler: python_template/handler.run
+  priorDiff:
+    handler: 14-detect-change/handler.run
+    runtime: python3.8
