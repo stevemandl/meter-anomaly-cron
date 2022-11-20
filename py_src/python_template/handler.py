@@ -46,6 +46,36 @@ def run(event, context):
                 response[
                     "body"
                 ] = f"{point_name} is stuck at the same reading for the period {start_time:%Y-%m-%d %H:%M} to {end_time:%Y-%m-%d %H:%M}" 
+            
+            # Significant changes in ratio of meter reading to cooling degrees(or enthalpy)
+            end_time_last_week = end_time - timedelta(10080)
+            start_time_last_week = end_time_last_week - timedelta(30)
+            trend_past_response = fetch_trends(
+                point=point_name, start_time=start_time_last_week, end_time=end_time_last_week
+            )
+            current_mean = np.mean(trend_response[0]["datapoints"])
+            # change index
+            past_mean = np.mean(trend_past_response[0]["datapoints"])
+            ratio = current_mean/past_mean
+            if ratio < 0.5 or ratio > 2:
+                response[
+                    "body"
+                ] = f"{point_name} is significantly different from {start_time:%Y-%m-%d %H:%M} to {end_time:%Y-%m-%d %H:%M} compared to last week's readings for cooling degrees"
+
+            #Significant changes in ratio of meter reading to heating degrees
+            end_time_last_week = end_time - timedelta(10080)
+            start_time_last_week = end_time_last_week - timedelta(30)
+            trend_past_response = fetch_trends(
+                point=point_name, start_time=start_time_last_week, end_time=end_time_last_week
+            )
+            current_mean = np.mean(trend_response[1]["datapoints"])
+            #change index
+            past_mean = np.mean(trens_past_responsse[1]["datapoints"])
+            ratio = current_mean/past_mean
+            if ratio < 0.5 or ratio > 2 :
+                response[
+                    "body"
+                ] = f"{point_name} is significantly different from {start_time:%Y-%m-%d %H:%M} to {end_time:%Y-%m-%d %H:%M} compared to last week's readings for heating degrees"
 
         else:  # response should always be a list
             response[
