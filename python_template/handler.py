@@ -88,14 +88,15 @@ def run(event, context):
             trend_past_response = fetch_trends(
                 point=point_name, start_time=start_time_last_week, end_time=end_time_last_year
             )
-            current_mean_now = np.mean(trend_response[1]["datapoints"])
+            for i in range(len(trend_past_response)):
+                current_mean_now = np.mean(trend_response[i]["datapoints"])
             # change index
-            past_mean_year = np.mean(trend_past_response[1]["datapoints"])
-            ratio = current_mean_now/past_mean_year
-            if ratio < 0.5 or ratio > 2:
-                response[
-                    "body"
-                ] = f"{point_name} is significantly different from {start_time:%Y-%m-%d %H:%M} to {end_time:%Y-%m-%d %H:%M} compared to last year's readings for heating degrees"
+                past_mean_year = np.mean(trend_past_response[i]["datapoints"])
+                ratio = current_mean_now/past_mean_year
+                if ratio < 0.5 or ratio > 2:
+                    response[
+                        "body"
+                    ] = f"{point_name} Energy type {i} is significantly different from {start_time:%Y-%m-%d %H:%M} to {end_time:%Y-%m-%d %H:%M} compared to last year's readings for heating degrees"
 
         else:  # response should always be a list
             response[
