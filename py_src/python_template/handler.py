@@ -4,7 +4,7 @@ from requests.exceptions import ConnectionError, HTTPError
 
 from python_lib.utils import parse_event, fetch_trends
 import json
-
+import numpy as np
 
 def run(event, context):
     # start out with blank response
@@ -25,10 +25,28 @@ def run(event, context):
         # data should always be there, but just to be on the safe side, make an if statement
         if type(trend_response) is list:
             # this is the logic in the anomaly detection:
+
+            # Spotty Data Check
             if len(trend_response[0]["datapoints"]) < 648:
                 response[
                     "body"
                 ] = f"{point_name} is missing more than 10% of values for the period {start_time:%Y-%m-%d %H:%M} to {end_time:%Y-%m-%d %H:%M}"
+
+            #Ignoring significant increases in nighttime baseline on CW meters as Cole does not think this is useful
+
+            #Stuck at Same Reading 
+            sampleSize = 5
+            def GetSpacedElements(array, numElems = 4):
+                out = array[np.round(np.linspace(0, len(array)-1, numElems)).astype(int)]
+                return out
+            spacedArray = GetSpacedElements(trend_response[0]["datapoints"], sampleSize)
+            def all_same(items):
+                return all(x == items[0] for x in items)
+            if all_same(spacedArray):
+                response[
+                    "body"
+                ] = f"{point_name} is stuck at the same reading for the period {start_time:%Y-%m-%d %H:%M} to {end_time:%Y-%m-%d %H:%M}" 
+
         else:  # response should always be a list
             response[
                 "body"
@@ -50,3 +68,16 @@ def run(event, context):
             except ValueError as e:
                 pass
     return response
+
+
+"""
+Possible changes to the handler:
+Obvious faults: 
+WhiteHall 
+    Electric March 2022
+    Steep drop in electricity consumption when no building improvements have been made
+Rhodes Hall
+    No reading between April 18th and some time in May
+    Network Operations Center (NOC) Chilled Water detection was not working either  
+Rhodes seems to be implemented but need to implement WhiteHall!
+"""
