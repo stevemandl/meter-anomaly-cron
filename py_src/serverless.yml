@@ -9,9 +9,7 @@ plugins:
   - serverless-python-requirements
 custom:
   pythonRequirements:
-    dockerizePip: true
-    usePipenv: true
-    
+    usePipenv: false
 provider:
   name: aws
   runtime: python3.8

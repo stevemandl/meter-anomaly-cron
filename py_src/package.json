@@ -4,6 +4,10 @@
     "description": "Scheduler for running meter anomaly detection",
     "author": "Steve Mandl sjm34@cornell.edu",
     "license": "MIT",
+    "scripts": {
+        "postinstall": "pipenv install --dev; pipenv lock -r",
+        "test": "pipenv run pytest"
+    },
     "devDependencies": {
         "serverless-offline": "^11.0.1",
         "serverless-python-requirements": "^5.4.0"
