@@ -5,7 +5,7 @@
     "author": "Steve Mandl sjm34@cornell.edu",
     "license": "MIT",
     "scripts": {
-        "postinstall": "pipenv install --dev; pipenv lock -r",
+        "postinstall": "pip install pipenv==2022.5.2; pipenv install --dev; pipenv lock -r",
         "test": "pipenv run pytest"
     },
     "devDependencies": {
