@@ -15,11 +15,30 @@ provider:
     EMCS_API_KEY: ${param:emcs-api-key, '${env:EMCS_API_KEY}'}
     PORTAL_API_URL: 'https://portal-api.emcs.cucloud.net/'
     SLS_STAGE: ${sls:stage, '${param:SLS_STAGE}'}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - SNS:Publish
+          Resource: 'arn:aws:sns:us-east-1:498547149247:*'
+        - Effect: Allow
+          Action:
+            - lambda:InvokeFunction
+          Resource: 'arn:aws:lambda:us-east-1:498547149247:function:*'
+
 functions:
   cronHandler:
     handler: cron/handler.run
+    timeout: 30
     events:
       # Invoke Lambda function every top of the hour
       - schedule: cron(0 * ? * * *)
+    vpc:
+      securityGroupIds:
+        - sg-e622fc9e
+      subnetIds:
+        - subnet-86efa4ac
+        - subnet-c2a07c8a
   testTemplateHandler:
     handler: testTemplate/handler.run
