@@ -133,10 +133,10 @@ export async function run(event, context) {
                 // clear anomaly
                 await redis.hdel("meter-anomalies", invokeKey);
             }
-            await redis.quit();
             return null;
         })
     );
+    await redis.quit();
     //make the report
     const report = results
         .filter((r) => r.status != "fulfilled" || r.value) // only results with errors or responses
