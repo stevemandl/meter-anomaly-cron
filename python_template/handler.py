@@ -2,11 +2,13 @@
 from datetime import datetime, timedelta
 from requests.exceptions import ConnectionError, HTTPError
 
-from python_lib.utils import parse_event, fetch_trends
+import py_src.python_lib.utils
+from py_src.python_lib.utils import fetch_trends, parse_event
 import json
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import tensorflow
 
 
 def run(event, context):
