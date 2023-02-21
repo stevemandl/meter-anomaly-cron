@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 requests = "*"
 python-dateutil = "*"
+pyyaml = "*"
 
 [dev-packages]
 pytest = {version=">=6.2"}

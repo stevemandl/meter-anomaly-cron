@@ -23,10 +23,13 @@ def parse_event(event):
     if "timeStamp" in body:
         ts = body["timeStamp"]
         if type(ts) is str:
-            body["timeStamp"] = parser.parse(ts)
+            if ts.isnumeric():
+                body["timeStamp"] = datetime.fromtimestamp(float(ts))
+            else:
+                body["timeStamp"] = parser.parse(ts)
         else:
             if type(ts) is int or type(ts) is float:
-                body["timeStamp"] = datetime.fromtimestamp
+                body["timeStamp"] = datetime.fromtimestamp(float(ts))
             else: raise RuntimeError("invalid timeStamp")
     else:
         body["timeStamp"] = datetime.now()
