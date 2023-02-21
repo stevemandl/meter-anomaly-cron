@@ -10,7 +10,7 @@ def run(event, context):
     # start out with blank response
     response = {"statusCode": 200, "body": ""}
     now = datetime.now()
-    print(f"testTemplate run at {now} with event {event}")
+    # print(f"testTemplate run at {now} with event {event}")
     # parse event and ensure timeStamp and pointName are present
     params = parse_event(event)
     end_time = params.get("timeStamp")
