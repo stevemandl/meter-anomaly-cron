@@ -15,7 +15,7 @@ def run(event, context):
     print(event)
     params = parse_event(event)
     end_time = params.get("timeStamp")
-    start_time = end_time - timedelta(30)
+    start_time = end_time - timedelta(hours=2920)
     point_name = params.get("pointName")
     try:
         # fetch the trends
@@ -30,21 +30,24 @@ def run(event, context):
             # print(trend_response)
 
             data = trend_response[0]['datapoints'] # the timestamps are multiplied by 1000 for some reason?
-            # print(data)
-            # dt = int(start_time.)
 
-            # assuming dt is an hour, this code works. but can't just do that D:
-            dt = int(timedelta(hours=1).total_seconds()*1000) 
-            num_hours_missing = 0
+            dt = int(timedelta(hours=24).total_seconds()*1000)
+            num_missing = 0
+            where_missing = []
             total = int((data[len(data)-1][1] - data[0][1])/dt)
             for i in range(len(data) - 1):
-                print((data[i+1][1] - data[i][1])/dt)
+                # print((data[i+1][1] - data[i][1])/dt)
                 if data[i+1][1] - data[i][1] != dt:
-                    num_hours_missing += int((data[i+1][1] - data[i][1])/dt)
-            if num_hours_missing > 0:
+                    num_missing += int((data[i+1][1] - data[i][1])/dt)
+                    where_missing.append((data[i][1], data[i+1][1]))
+            if num_missing > 0:
+                s = f"{point_name} is missing more than {int((num_missing / total)*100)}% of values for the period {start_time:%Y-%m-%d %H:%M} to {end_time:%Y-%m-%d %H:%M}. \n They are missing for the following time period(s):\n"
+                output = [s]
+                for duration in where_missing:
+                    output.append(f' - From {datetime.fromtimestamp(duration[0]//1000):%Y-%m-%d %H:%M} to {datetime.fromtimestamp(duration[1]//1000):%Y-%m-%d %H:%M}')
                 response[
                     "body"
-                ] = f"{point_name} is missing more than {int((num_hours_missing / total)*100)}% of values for the period {start_time:%Y-%m-%d %H:%M} to {end_time:%Y-%m-%d %H:%M}"
+                ] = ''.join(output)
         else:  # response should always be a list
             response[
                 "body"
