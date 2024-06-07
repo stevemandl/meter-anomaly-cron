@@ -28,7 +28,7 @@ Resources:
   TestTemplate:
     Type: AWS::Serverless::Function
     Properties:
-    FunctionName: tsTemplate
+      FunctionName: tsTemplate
       Description: Test Template
       Runtime: nodejs20.x
       Architectures:
