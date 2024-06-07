@@ -11,6 +11,7 @@ Resources:
   CronHandler:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: cronHandler
       Description: Periodically checks to see what functions to invoke.
       Runtime: nodejs20.x
       Architectures:
@@ -27,6 +28,7 @@ Resources:
   TestTemplate:
     Type: AWS::Serverless::Function
     Properties:
+    FunctionName: tsTemplate
       Description: Test Template
       Runtime: nodejs20.x
       Architectures:

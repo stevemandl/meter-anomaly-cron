@@ -29,7 +29,7 @@ function emcsURL(point: string) {
 const algorithms: AlgorithmCfg[] = [
     {
         objListPoint: "MeterAnomaly.testTemplateHandler.PointList",
-        fn: "testTemplateHandler",
+        fn: "tsTemplate",
         service: "meter-anomaly-ts",
     },
     {
