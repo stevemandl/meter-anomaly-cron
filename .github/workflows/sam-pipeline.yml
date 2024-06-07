@@ -17,8 +17,6 @@ jobs:
           aws-region: us-east-1
       # sam build 
       - run: |
-          pip install --upgrade pip
-          pip install pipenv --user
           sam build --use-container
 
 # Run Unit tests- Specify unit tests here 
