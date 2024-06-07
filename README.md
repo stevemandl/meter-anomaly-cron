@@ -10,21 +10,26 @@ authorName: 'Steve Mandl'
 authorAvatar: 'https://secure.gravatar.com/avatar/d3fe459f8114ad905d54de551e44e4f0?s=800&d=identicon'
 -->
 
-# Serverless Framework Node Scheduled Cron on AWS
+# AWS Serverless Application Model Framework Node Scheduled Cron on AWS
 
-This project is for developing and deploying simple cron-like service running on AWS Lambda using the traditional Serverless framework. 
+This project is for developing meter anomaly detection algorithms and scheduling them to run in AWS Lambda using the Serverless Application Model (SAM) framework.
 The cronHandler function is invoked automatically according to the event schedule. The cronHandler calls anomaly detection functions with a single parameter: meter name. Which algorithms get called with which point names is determined by the configuration lists maintained at https://www.emcs.cornell.edu/MeterAnomalyConfig. 
 The functions apply a specific anomaly detection algorithm, and return a description of the anomaly detected only if detection occurs. If no anomaly is detected, the algorithm should return falsy(false/False, null/None, or an empty string).
 
 
-In below example, we use `cron` syntax to define `schedule` event that will trigger our `cronHandler` function every second minute every Monday through Friday
+In below example, we use `cron` syntax to define `Schedule` event that will trigger our `cronHandler` function every hour
 
 ```yml
-functions:
-  cronHandler:
-    handler: handler.run
-    events:
-      - schedule: cron(0/2 * ? * MON-FRI *)
+Resources:
+  CronHandler:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: cron/handler.run
+      Events:
+        CloudWatchEvent:
+          Type: Schedule
+          Properties:
+            Schedule: cron(0 * ? * * *)      
 ```
 
 Detailed information about cron expressions in available in official [AWS docs](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html#CronExpressions).
@@ -34,20 +39,15 @@ Detailed information about cron expressions in available in official [AWS docs](
 
 Use [git](https://github.com/git-guides/install-git) to clone a local copy of this repository. Development work should be done on dev branches associated with a repository issue. Please do not make changes to the dev or main branches. Ask Steve if you have questions about how to create, check out, commit changes, and push to dev branches.
 
-Node and npm are required for testing javascript, typescript, and for using the serverless framework. See https://docs.npmjs.com/downloading-and-installing-node-js-and-npm for installation instructions.
+Node and npm are required for testing javascript and typescript. See https://docs.npmjs.com/downloading-and-installing-node-js-and-npm for installation instructions.
 ### Install Dependencies
-Serverless framework is only required for local invocation and offline emulation of lambda functions. See https://www.serverless.com/console/docs (Development and testing of algorithms can be done without serverless.)
 
-Install serverless globally (these instructions depend on npm. If you wish to install serverless using another package manager, consult the serverless docs.):
-```
-npm i -g serverless
-```
-Install other dependencies into the project directory from the base directory prior to use:
+If developing in javascript or typescript, install node dependencies into the project directory from the base directory prior to use:
 ```
 npm install
 ```
 
-If developing in python, python 3.8 and pipenv are required
+If developing in python, python 3.9 and pipenv are required
 See https://github.com/pypa/pipenv#installation
 
 Be sure to run 
@@ -59,7 +59,7 @@ from the py_src directory to set up your local environment.
 ### Tools
 A code editor such as Visual Studio Code is recommended. See https://code.visualstudio.com/docs for information about vscode.
 
-When working with AWS resources such as lambda functions, the AWS CLI is useful. See https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html 
+When working with AWS resources such as lambda functions, the AWS and AWS SAM CLI are useful. See https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html and https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html
 
 ### Testing
 Run the npm test suite for js and ts source code:
@@ -111,47 +111,22 @@ Elapsed time (seconds): '0.453'.
 In order to invoke lambda functions locally, you can invoke them from the py_src or ts_src/ directory with a command similar to the following:
 
 ```
-sls invoke local --function pythonTemplate --data '{"body": {"pointName": "AppelCommons.CW.FP/TONS", "timeStamp": "2022-11-17"}}'
+sam local invoke --event events/KlarmanSolar.json MeterAnomalyPY/PythonTemplate
 ```
 
 After invocation, you should see output similar to:
 
 ```bash
-Running "serverless" from node_modules
-testTemplate run at 2022-11-18 13:52:38.354892 with event {'body': {'pointName': 'AppelCommons.CW.FP/TONS', 'timeStamp': '2022-11-17'}}
-
-{
-    "statusCode": 200,
-    "body": ""
-}
-
+Invoking python_template/handler.run (python3.9)                                                                                                                                                                                           
+Local image is up-to-date                                                                                                                                                                                                                  
+Using local image: public.ecr.aws/lambda/python:3.9-rapid-x86_64.                                                                                                                                                                          
+                                                                                                                                                                                                                                           
+Mounting /home/ec2-user/environment/meter-anomaly-cron/.aws-sam/build/MeterAnomalyPY/PythonTemplate as /var/task:ro,delegated, inside runtime container                                                                                    
+END RequestId: 9c8e272c-4ba1-402a-bd05-4acb9546b0b0
+REPORT RequestId: 9c8e272c-4ba1-402a-bd05-4acb9546b0b0  Init Duration: 0.03 ms  Duration: 447.82 ms     Billed Duration: 448 ms Memory Size: 128 MB     Max Memory Used: 128 MB
+{"statusCode": 200, "body": ""}
 ```
 The body of the response should contain the anomaly description, if detected, or an empty string if no anomaly is detected.
-### Offline emulation
-
-If you want to invoke your functions through a lambda-like endpoint from a client that would be making webservice requests to the API gateway, use the following command start the python service (i.e. all functions written in python) from the project root:
-
-```bash
-$ serverless meter-anomaly-py:offline
-```
-
-After starting serverless offline, you should see output like:
-
-```
-Running "serverless" from node_modules
-
-Starting Offline at stage dev (us-east-1)
-
-Offline [http for lambda] listening on http://localhost:3002
-Function names exposed for local invocation by aws-sdk:
-           * pythonTemplate: meter-anomaly-py-dev-pythonTemplate
-```
-
-Then you should be able to send a request from a separate terminal to the offline service like this:
-```bash
-$ aws lambda invoke --endpoint-url http://localhost:3002 --function-name meter-anomaly-py-dev-pythonTemplate --payload '{"body": { "pointName": "AppelCommons.CW.FP/TONS" }}' response.json
-```
-The response will be written to the file response.json as specified.
 
 ### Project directory structure
 The project is organized by programming language: py_src/ contains python source code and ts_src/ contains typescript.
@@ -163,7 +138,7 @@ Each lambda function is in its own subdirectory of the source root. Test files a
 ├── ts_src                      # source root for typescript
 |   ├── package.json            # npm package config
 |   ├── package-lock.json       # npm config lockfile
-|   ├── serverless.yml          # Serverless service file for typescript functions
+|   ├── template.yaml           # SAM template for ts functions
 |   ├── tsconfig.json           # Typescript compiler configuration
 |   ├── types.ts                # Typescript types
 │   ├── tslib                   # Shared code library for typescript
@@ -176,7 +151,7 @@ Each lambda function is in its own subdirectory of the source root. Test files a
 │       └── handler.spec.ts     # Tests for typescript cron lambda
 |
 ├── py_src                      # source root for typescript
-|   ├── serverless.yml          # Serverless service file for python functions
+|   ├── template.yaml           # SAM template for python functions
 |   ├── pytest.ini              # pytest settings
 |   ├── Pipfile                 # pipenv requirements
 |   ├── Pipfile.lock            # generated by `pipenv lock`
@@ -186,10 +161,13 @@ Each lambda function is in its own subdirectory of the source root. Test files a
 │   └── python_template         # Python template algorithm
 │       ├── handler.py          # Entry point for python template lambda
 │       └── handler_spec.py     # Tests for python template lambda
+├── events                      # sample event json files used for local invocation
+│   └── KlarmanSolar.json       # Event to test using Klarman hall solar electric meter
 │
 ├── .gitignore                  # specifies untracked files that git should ignore
 ├── CODE_OF_CONDUCT.md          # Generic code of conduct for shared github repositories
 ├── CONTRIBUTING.md             # Contribution guidelines
+├── template.yaml               # references to nested SAM Applications
 └── README.md                   # If you're reading this, ...
 ```
 

@@ -1,0 +1,37 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  meter-anomaly-cron-ts
+
+# Transform section specifies one or more macros that AWS CloudFormation uses to process your template
+# https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/transform-section-structure.html
+Transform:
+- AWS::Serverless-2016-10-31
+Resources:  
+
+  CronHandler:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Periodically checks to see what functions to invoke.
+      Runtime: nodejs20.x
+      Architectures:
+        - x86_64
+      Handler: cron/handler.run
+      # This runs every hour.
+      Events:
+        CloudWatchEvent:
+          Type: Schedule
+          Properties:
+            Schedule: cron(0 * ? * * *)
+      MemorySize: 128
+      Timeout: 100
+  TestTemplate:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Test Template
+      Runtime: nodejs20.x
+      Architectures:
+        - x86_64
+      Handler: testTemplate/handler.run
+      MemorySize: 128
+      Timeout: 100
+  
