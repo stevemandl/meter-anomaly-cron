@@ -16,7 +16,6 @@ Resources:
       Runtime: nodejs20.x
       Architectures:
         - x86_64
-      CodeUri: ts_src/
       Handler: cron/handler.run
       # This runs every hour.
       Events:
@@ -26,6 +25,14 @@ Resources:
             Schedule: cron(0 * ? * * *)
       MemorySize: 128
       Timeout: 100
+    Metadata: # Manage esbuild properties
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints: 
+        - handler.ts    
   TestTemplate:
     Type: AWS::Serverless::Function
     Properties:
@@ -34,8 +41,15 @@ Resources:
       Runtime: nodejs20.x
       Architectures:
         - x86_64
-      CodeUri: ts_src/
       Handler: testTemplate/handler.run
       MemorySize: 128
       Timeout: 100
+    Metadata: # Manage esbuild properties
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints: 
+        - handler.ts    
   
