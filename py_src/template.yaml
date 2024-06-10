@@ -3,20 +3,23 @@ Description: >-
   meter-anomaly-cron-py
 Transform:
 - AWS::Serverless-2016-10-31
+Globals:
+  Function:
+    Runtime: python3.9
+    Architectures:
+      - x86_64
+    Timeout: 100
+    MemorySize: 128
+    Environment:
+      Variables:
+        PORTAL_API_URL: 'https://portal-api.emcs.cucloud.net/'
+
 Resources:  
   PythonTemplate:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: pythonTemplate
       Description: Python Template
-      Runtime: python3.9
-      Architectures:
-        - x86_64
       Handler: python_template/handler.run
-      MemorySize: 128
-      Timeout: 100
-      Environment:
-        Variables:
-          PORTAL_API_URL: 'https://portal-api.emcs.cucloud.net/'
     Metadata:
       BuildMethod: makefile

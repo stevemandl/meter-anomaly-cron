@@ -6,6 +6,19 @@ Description: >-
 # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/transform-section-structure.html
 Transform:
 - AWS::Serverless-2016-10-31
+Globals:
+  Function:
+    Runtime: nodejs20.x
+    Architectures:
+      - x86_64
+    Timeout: 100
+    MemorySize: 128
+    Environment:
+      Variables:
+        EMCS_API_KEY: ${param:emcs-api-key, '${env:EMCS_API_KEY}'}
+        PORTAL_API_URL: 'https://portal-api.emcs.cucloud.net/'
+        SLS_STAGE: ${sls:stage, '${param:SLS_STAGE}'}
+        
 Resources:  
 
   CronHandler:
@@ -13,9 +26,6 @@ Resources:
     Properties:
       FunctionName: cronHandler
       Description: Periodically checks to see what functions to invoke.
-      Runtime: nodejs20.x
-      Architectures:
-        - x86_64
       Handler: cron/handler.run
       # This runs every hour.
       Events:
@@ -23,8 +33,23 @@ Resources:
           Type: Schedule
           Properties:
             Schedule: cron(0 * ? * * *)
-      MemorySize: 128
-      Timeout: 100
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-e622fc9e
+        SubnetIds:
+          - subnet-86efa4ac
+          - subnet-c2a07c8a
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - SNS:Publish
+            Resource: 'arn:aws:sns:us-east-1:498547149247:*'
+          - Effect: Allow
+            Action:
+              - lambda:InvokeFunction
+            Resource: 'arn:aws:lambda:us-east-1:498547149247:function:*'
     Metadata: # Manage esbuild properties
       BuildMethod: esbuild
       BuildProperties:
@@ -38,12 +63,7 @@ Resources:
     Properties:
       FunctionName: tsTemplate
       Description: Test Template
-      Runtime: nodejs20.x
-      Architectures:
-        - x86_64
       Handler: testTemplate/handler.run
-      MemorySize: 128
-      Timeout: 100
     Metadata: # Manage esbuild properties
       BuildMethod: esbuild
       BuildProperties:
