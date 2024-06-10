@@ -16,6 +16,7 @@ Resources:
       Runtime: nodejs20.x
       Architectures:
         - x86_64
+      CodeUri: ts_src/
       Handler: cron/handler.run
       # This runs every hour.
       Events:
@@ -33,6 +34,7 @@ Resources:
       Runtime: nodejs20.x
       Architectures:
         - x86_64
+      CodeUri: ts_src/
       Handler: testTemplate/handler.run
       MemorySize: 128
       Timeout: 100
