@@ -39,9 +39,9 @@ Resources:
         SubnetIds:
           - subnet-86efa4ac
           - subnet-c2a07c8a
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
+      Policies:
+        - Version: 2012-10-17
+          Statement:
           - Effect: Allow
             Action:
               - SNS:Publish
