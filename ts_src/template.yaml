@@ -22,7 +22,6 @@ Parameters:
     Type: String
 
 Resources:  
-
   CronHandler:
     Type: AWS::Serverless::Function
     Properties:
