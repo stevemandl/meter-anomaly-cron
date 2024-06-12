@@ -5,25 +5,6 @@ Description: >-
 Transform:
 - AWS::Serverless-2016-10-31
 
-Resources:  
-  MeterAnomalyTS:
-    Type: AWS::Serverless::Application
-    Properties:
-      Location: ts_src/template.yaml
-  MeterAnomalyPY:
-    Type: AWS::Serverless::Application
-    Properties:
-      Location: py_src/template.yaml
-Globals:
-  Function:
-    Environment:
-      Variables:
-        PORTAL_API_URL:
-          Ref: APIURLParameter
-        EMCS_API_KEY:
-          Ref: EMCSAPIKEYParameter
-        SAM_STAGE:
-          Ref: StageParameter
 Parameters:
   EMCSAPIKEYParameter:
     Type: String
@@ -31,3 +12,19 @@ Parameters:
     Type: String
   APIURLParameter:
     Type: String
+Resources:  
+  MeterAnomalyTS:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: ts_src/template.yaml
+      Parameters:
+        EMCSAPIKEYParameter: !Ref EMCSAPIKEYParameter
+        StageParameter: !Ref StageParameter
+        APIURLParameter: !Ref APIURLParameter
+  MeterAnomalyPY:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: py_src/template.yaml
+      Parameters:
+        StageParameter: !Ref StageParameter
+        APIURLParameter: !Ref APIURLParameter

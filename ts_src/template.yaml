@@ -13,6 +13,13 @@ Globals:
       - x86_64
     Timeout: 100
     MemorySize: 1024
+Parameters:
+  EMCSAPIKEYParameter:
+    Type: String
+  StageParameter:
+    Type: String
+  APIURLParameter:
+    Type: String
 
 Resources:  
 
@@ -28,6 +35,11 @@ Resources:
           Type: Schedule
           Properties:
             Schedule: cron(0 * ? * * *)
+      Environment:
+        Variables:
+          EMCS_API_KEY: !Ref EMCSAPIKEYParameter
+          SAM_STAGE: !Ref StageParameter
+          API_URL: !Ref APIURLParameter
       VpcConfig:
         SecurityGroupIds:
           - sg-e622fc9e
@@ -59,6 +71,10 @@ Resources:
       FunctionName: tsTemplate
       Description: Test Template
       Handler: testTemplate/handler.run
+      Environment:
+        Variables:
+          SAM_STAGE: !Ref StageParameter
+          API_URL: !Ref APIURLParameter
     Metadata: # Manage esbuild properties
       BuildMethod: esbuild
       BuildProperties:
