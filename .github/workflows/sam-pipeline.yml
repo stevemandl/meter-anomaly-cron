@@ -31,9 +31,6 @@ jobs:
           --no-confirm-changeset
           --no-fail-on-empty-changeset
           --stack-name meter-anomaly-cron-stack
-          --container-env-var EMCS_API_KEY=${{ secrets.EMCS_API_KEY }}
-          --container-env-var SAM_STAGE=$GITHUB_REF_NAME
-          --container-env-var PORTAL_API_URL='https://portal-api.emcs.cucloud.net/'
           --s3-bucket meter-anomaly-cron-sam-deployment-bucket
           --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND
           --region us-east-1
