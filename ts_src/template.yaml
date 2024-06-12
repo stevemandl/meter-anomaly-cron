@@ -8,17 +8,12 @@ Transform:
 - AWS::Serverless-2016-10-31
 Globals:
   Function:
-    Runtime: nodejs20.x
+    Runtime: nodejs18.x
     Architectures:
       - x86_64
     Timeout: 100
-    MemorySize: 128
-    Environment:
-      Variables:
-        EMCS_API_KEY: ${param:emcs-api-key, '${env:EMCS_API_KEY}'}
-        PORTAL_API_URL: 'https://portal-api.emcs.cucloud.net/'
-        SLS_STAGE: ${sls:stage, '${param:SLS_STAGE}'}
-        
+    MemorySize: 1024
+
 Resources:  
 
   CronHandler:
@@ -72,4 +67,4 @@ Resources:
         Sourcemap: true
         EntryPoints: 
         - testTemplate/handler.ts    
-  
+
