@@ -16,8 +16,12 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
       # sam build 
-      - run: |
+      - run: >
           sam build
+          --use-container
+          --container-env-var EMCS_API_KEY=${{ secrets.EMCS_API_KEY }}
+          --container-env-var SAM_STAGE=$GITHUB_REF_NAME
+          --container-env-var PORTAL_API_URL='https://portal-api.emcs.cucloud.net/'
 
 # Run Unit tests- Specify unit tests here 
 
