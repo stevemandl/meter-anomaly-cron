@@ -14,3 +14,20 @@ Resources:
     Type: AWS::Serverless::Application
     Properties:
       Location: py_src/template.yaml
+Globals:
+  Function:
+    Environment:
+      Variables:
+        PORTAL_API_URL:
+          Ref: APIURLParameter
+        EMCS_API_KEY:
+          Ref: EMCSAPIKEYParameter
+        SAM_STAGE:
+          Ref: StageParameter
+Parameters:
+  EMCSAPIKEYParameter:
+    Type: String
+  StageParameter:
+    Type: String
+  APIURLParameter:
+    Type: String

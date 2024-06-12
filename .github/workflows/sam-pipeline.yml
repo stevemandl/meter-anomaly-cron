@@ -34,3 +34,4 @@ jobs:
           --s3-bucket meter-anomaly-cron-sam-deployment-bucket
           --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND
           --region us-east-1
+          --parameter-overrides EMCSAPIKEYParameter=${{ secrets.EMCS_API_KEY }} StageParameter=$GITHUB_REF_NAME APIURLParameter='https://portal-api.emcs.cucloud.net/'
