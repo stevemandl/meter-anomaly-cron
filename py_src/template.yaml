@@ -23,7 +23,7 @@ Resources:
   PythonTemplate:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: pythonTemplate
+      FunctionName: !Sub "meter-anomaly-py-${StageParameter}-pythonTemplate"
       Description: Python Template
       Handler: python_template/handler.run
     Metadata:

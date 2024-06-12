@@ -25,7 +25,7 @@ Resources:
   CronHandler:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: cronHandler
+      FunctionName: !Sub "meter-anomaly-ts-${StageParameter}-cronHandler"
       Description: Periodically checks to see what functions to invoke.
       Handler: cron/handler.run
       # This runs every hour.
@@ -67,7 +67,7 @@ Resources:
   TestTemplate:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: tsTemplate
+      FunctionName: !Sub "meter-anomaly-ts-${StageParameter}-tsTemplate"
       Description: Test Template
       Handler: testTemplate/handler.run
       Environment:
