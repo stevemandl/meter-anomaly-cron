@@ -1,0 +1,37 @@
+on:
+  push:
+    branches:
+      - dev
+      - main
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v4
+      - uses: aws-actions/setup-sam@v2
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      # sam build 
+      - run: >
+          sam build
+          --use-container
+          --container-env-var EMCS_API_KEY=${{ secrets.EMCS_API_KEY }}
+          --container-env-var SAM_STAGE=$GITHUB_REF_NAME
+          --container-env-var PORTAL_API_URL='https://portal-api.emcs.cucloud.net/'
+
+# Run Unit tests- Specify unit tests here 
+
+# sam deploy
+      - run: >
+          sam deploy
+          --no-confirm-changeset
+          --no-fail-on-empty-changeset
+          --stack-name meter-anomaly-cron-stack
+          --s3-bucket meter-anomaly-cron-sam-deployment-bucket
+          --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND
+          --region us-east-1
+          --parameter-overrides EMCSAPIKEYParameter=${{ secrets.EMCS_API_KEY }} StageParameter=$GITHUB_REF_NAME APIURLParameter='https://portal-api.emcs.cucloud.net/'

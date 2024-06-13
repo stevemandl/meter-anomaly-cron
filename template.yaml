@@ -1,0 +1,30 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  meter-anomaly-cron-stack
+
+Transform:
+- AWS::Serverless-2016-10-31
+
+Parameters:
+  EMCSAPIKEYParameter:
+    Type: String
+  StageParameter:
+    Type: String
+  APIURLParameter:
+    Type: String
+Resources:  
+  MeterAnomalyTS:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: ts_src/template.yaml
+      Parameters:
+        EMCSAPIKEYParameter: !Ref EMCSAPIKEYParameter
+        StageParameter: !Ref StageParameter
+        APIURLParameter: !Ref APIURLParameter
+  MeterAnomalyPY:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: py_src/template.yaml
+      Parameters:
+        StageParameter: !Ref StageParameter
+        APIURLParameter: !Ref APIURLParameter

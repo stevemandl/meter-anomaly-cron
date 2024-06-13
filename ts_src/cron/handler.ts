@@ -6,7 +6,7 @@ import { AlgorithmCfg, ObjList } from "../types";
 
 const API_KEY: string | undefined = process.env.EMCS_API_KEY;
 const SECRET_TOKEN: string | undefined = process.env.SECRET_TOKEN;
-const SLS_STAGE: string | undefined = process.env.SLS_STAGE;
+const SAM_STAGE: string | undefined = process.env.SAM_STAGE;
 const REPORT_URL: string = "https://portal.emcs.cornell.edu/d/broken_meter_ticket_report/broken-meter-ticket-report";
 
 
@@ -29,7 +29,7 @@ function emcsURL(point: string) {
 const algorithms: AlgorithmCfg[] = [
     {
         objListPoint: "MeterAnomaly.testTemplateHandler.PointList",
-        fn: "testTemplateHandler",
+        fn: "tsTemplate",
         service: "meter-anomaly-ts",
     },
     {
@@ -47,8 +47,12 @@ export async function fetchPoints(cfg: AlgorithmCfg): Promise<string[]> {
     const { data } = await axios.get<ObjList>(URL);
     // EMCS API responses are text/plain ,so we need to manually
     // convert single quotes to double, then parse
-    const objArray: string[] = JSON.parse(data.objectList.replace(/'/g, '"'));
-    return objArray;
+    console.log(`EMCS url ${URL} returned object list: ${data.objectList}`);
+    if (data.objectList){
+        const objArray: string[] = JSON.parse(data.objectList.replace(/'/g, '"'));
+        return objArray;
+    }
+    else return [];
 }
 
 // invokeLambda()
@@ -59,7 +63,7 @@ export async function invokeLambda(
     pointName: string
 ) {
     const params: Lambda.InvocationRequest = {
-        FunctionName: `${service}-${SLS_STAGE}-${uri}`,
+        FunctionName: `${service}-${SAM_STAGE}-${uri}`,
         InvocationType: "RequestResponse",
         Payload: JSON.stringify({ body: { pointName } }),
     };
