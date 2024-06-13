@@ -12,6 +12,7 @@ pyyaml = {version=">=6.0.1"}
 pytest = {version=">=6.2"}
 pytest-cov = {version=">=2.12"}
 pytest-mock = "*"
+pylint = "*"
 
 [requires]
-python_version = "*"
+python_version = "3.9"

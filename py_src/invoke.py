@@ -4,15 +4,10 @@ invoke.py
 script to invoke a python meter-anomaly algorithm
 """
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
-import yaml
 import re
 import importlib
 import time
-import os
 
-f = open("serverless.yml")
-sls = yaml.load(f, Loader=yaml.FullLoader)
-os.environ["PORTAL_API_URL"] = sls["provider"]["environment"]["PORTAL_API_URL"]
 FN_RE = r"(?P<pkg>\w+)/(?P<subpkg>\w+)\.(?P<fn>\w+)"
 
 if __name__ == "__main__":
