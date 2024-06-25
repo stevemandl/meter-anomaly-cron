@@ -70,9 +70,9 @@ def build_index(response):
     
     """
     index = {}
-    for entry in range(len(response)):
+    for (_, entry) in enumerate(response):
         data= {}
-        for x in range(len(response[entry]["datapoints"])):
-            data[response[entry]["datapoints"][x][1]] = response[entry]["datapoints"][x][0]
-            index.update({response[entry]["target"]:data})
+        for (_, time) in enumerate(entry["datapoints"]):
+            data[time[1]] = time[0]
+            index.update({entry["target"]:data})
     return(index)
