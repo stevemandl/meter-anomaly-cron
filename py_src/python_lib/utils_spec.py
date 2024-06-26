@@ -1,6 +1,6 @@
 # python_lib/utils_spec.py
 
-from python_lib.utils import parse_event, fetch_trends
+from python_lib.utils import parse_event, fetch_trends, build_index
 from datetime import datetime
 from requests.models import Response
 import pytest
@@ -54,3 +54,17 @@ def test_fetch_trends(mocker):
     mocker.patch("python_lib.utils.requests.post", return_value=r)
     result = fetch_trends("foo", start_time=datetime.now())
     assert "data" in result
+
+def test_build_index():
+    empty_trends = [{ "datapoints": [] }]
+    empty_idx = build_index(empty_trends)
+    assert not empty_idx
+    single_trends = [{ "target": "A", "datapoints": [[ 1.5, 1000 ], [3.5, 1600 ]] }]
+    single_idx = build_index(single_trends)
+    assert "A" in single_idx
+    assert single_idx["A"][1000] == 1.5
+    multi_trends = [{ "target": "A", "datapoints": [[ 1.5, 5000 ], [3.5, 5600 ]] },{ "target": "B", "datapoints": [[ 2.5, 2000 ], [4.5, 2600 ]] }]
+    multi_idx = build_index(multi_trends)
+    assert "A" in multi_idx and "B" in multi_idx
+    assert multi_idx["A"][5000] == 1.5
+    assert multi_idx["B"][2600] == 4.5

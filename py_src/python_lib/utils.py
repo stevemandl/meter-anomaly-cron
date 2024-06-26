@@ -61,3 +61,18 @@ def fetch_trends(point=None, points=None, start_time=None, end_time=datetime.now
     raw_response.raise_for_status()
 
     return raw_response.json()
+
+def build_index(response):
+    """
+    Returns a dict with target names as indexes to dictionaries of data values indexed by their timestamps
+    :expects a trend response in the format returned by the fetch_trends function
+    :param empty response returns an empty dict
+    
+    """
+    index = {}
+    for (_, entry) in enumerate(response):
+        data= {}
+        for (_, time) in enumerate(entry["datapoints"]):
+            data[time[1]] = time[0]
+            index.update({entry["target"]:data})
+    return(index)
