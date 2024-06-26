@@ -5,6 +5,8 @@ import os
 from datetime import datetime
 from dateutil import parser
 import requests
+import numpy as np
+import pandas as pd
 
 # globals
 PORTAL_API_URL = os.environ.get("PORTAL_API_URL", "/")
@@ -36,12 +38,13 @@ def parse_event(event):
     return body
 
 
-def fetch_trends(point=None, points=None, start_time=None, end_time=datetime.now()):
+def fetch_trends(point=None, points=None, start_time=None, end_time=datetime.now(), additional=[]):
     """Returns trend response(s) for all of the points provided in the time range specified
     :param string point: cannot be provided with points
     :param list points: cannot be provided with point
     :param datetime start_time: required
     :param datetime end_time: optional, defaults to now()
+    :param list additional : optional additional data to pass to API, defaults to []
     """
     # ensure points is a list
     if point and points:
@@ -49,7 +52,7 @@ def fetch_trends(point=None, points=None, start_time=None, end_time=datetime.now
     if not points:
         points = [point]
     targets = [
-        {"target": p, "payload": {"additional": []}, "type": "timeseries"}
+        {"target": p, "payload": {"additional": additional}, "type": "timeseries"}
         for p in points
     ]
     request_data = {
@@ -76,3 +79,22 @@ def build_index(response):
             data[time[1]] = time[0]
             index.update({entry["target"]:data})
     return(index)
+
+def build_df(response, interpolate = True):
+    """ 
+    converts response to dataframe
+    keyword arguments:
+    response - a trend response like one returned by fetch_trends()
+    interpolate - optional, defalut=True. If true, the columns are interpolated
+    """
+    df = pd.DataFrame()
+    for t in response:
+        a = np.array(t["datapoints"])
+        t_df = pd.DataFrame.from_records(a, columns = (t["target"], "ts"), index="ts")
+        if df.empty:
+            df = t_df
+        else:
+            df = df.merge(t_df, how="outer", on="ts")
+    if interpolate:
+        return df.interpolate()
+    return df
