@@ -25,13 +25,17 @@ def run(event, _context):
     year_ago = now - timedelta(365)
     start_time = now - timedelta(RECENT_DAYS)
     point_name = params.get("pointName")
-    if not point_name.endswith("/TONS"):
-        response["body"] = f"{point_name} does not end with /TONS"
-        return response
-    device_name = point_name[:-5]
-    stemp_name = f"{device_name}/STEMP"
-    rtemp_name = f"{device_name}/RTEMP"
-    flow_name = f"{device_name}/FLOW"
+    device_name = point_name[:-4]
+    if point_name.endswith("TONS"):
+        stemp_name = f"{device_name}STEMP"
+        rtemp_name = f"{device_name}RTEMP"
+        flow_name = f"{device_name}FLOW"
+    elif point_name.endswith("Tons"):
+        stemp_name = f"{device_name}STemp"
+        rtemp_name = f"{device_name}RTemp"
+        flow_name = f"{device_name}Flow"
+    else:
+        raise(AnomalyError(f"{point_name} does not end with TONS"))
     tons_name = point_name
     oat_name = "GameFarmRoadWeatherStation.TAVG_H_F"
     try:
