@@ -28,3 +28,11 @@ Resources:
       Handler: python_template/handler.run
     Metadata:
       BuildMethod: makefile
+  LowDeltaT:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "meter-anomaly-py-${StageParameter}-lowDeltaT"
+      Description: Low Delta T
+      Handler: low_delta_t/handler.run
+    Metadata:
+      BuildMethod: makefile
