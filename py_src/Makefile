@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-build-PythonTemplate:
+build-PythonTemplate build-LowDeltaT:
 	cp -r ./* $(ARTIFACTS_DIR)
 	pip install --upgrade pip
 	pip install pipenv
