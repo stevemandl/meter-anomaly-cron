@@ -28,9 +28,9 @@ function emcsURL(point: string) {
 // TODO: store this externally
 const algorithms: AlgorithmCfg[] = [
     {
-        objListPoint: "MeterAnomaly.testTemplateHandler.PointList",
-        fn: "tsTemplate",
-        service: "meter-anomaly-ts",
+        objListPoint: "MeterAnomaly.LowDeltaT.PointList",
+        fn: "lowDeltaT",
+        service: "meter-anomaly-py",
     },
     {
         objListPoint: "MeterAnomaly.pythonTemplate.PointList",
