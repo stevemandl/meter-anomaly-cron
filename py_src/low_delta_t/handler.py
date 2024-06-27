@@ -55,9 +55,8 @@ def run(event, _context):
         # compare actual delta-t with modeled normal, and detect anomaly if it falls below model by more than variance
         actual_dt = np.sum(model_df[rtemp_name] - model_df[stemp_name])
         model_dt = np.sum(model_df["DT_PRED"])
-        # at this point, status_code must be 200 or an exception would be raised
-        # data should always be there, but just to be on the safe side, make an if statement
-        response[ "body" ] = f"""{point_name} actual_dt {actual_dt} model_dt {model_dt} for the period {start_time:%Y-%m-%d %H:%M} to {now:%Y-%m-%d %H:%M}"""
+        if actual_dt < model_dt * 0.9:
+            response[ "body" ] = f"""{point_name} actual_dt {actual_dt} model_dt {model_dt} for the period {start_time:%Y-%m-%d %H:%M} to {now:%Y-%m-%d %H:%M}"""
     except RequestConnectionError as err:
         response[
             "body"
