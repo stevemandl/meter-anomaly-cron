@@ -12,6 +12,8 @@ import pandas as pd
 PORTAL_API_URL = os.environ.get("PORTAL_API_URL", "/")
 QUERY_URL = f"{PORTAL_API_URL}query"
 
+class AnomalyError(Exception):
+    "Anomaly Exception class"
 
 def parse_event(event):
     """
