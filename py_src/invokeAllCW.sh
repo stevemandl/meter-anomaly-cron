@@ -1,16 +1,21 @@
 #!/bin/bash
 exec {points}<<eof
 AliceCookHouse.CW.FP/TONS
+AppelCommons.10064.FleximF721/CW.Tons
 BaileyHall.CW.FP/TONS
 BakerLab.CW.FP/TONS
+BarbaraMcClintockHall.B0061.FleximF721/CW.Tons
 BardHall.CW.FP/TONS
 BarnesHall.CW.FP/TONS
 BartonHall.CW.FP/TONS
+BeebeHall.LowerMER.FleximF721/CW.Tons
+BigRedBarn.10001.FleximF721/CW.Tons
 BiotechnologyBuilding.CW.FP/TONS
 BoyceThompsonInstitute.CW.FP/TONS
 BradfieldHall.CW.FP/TONS
 BrucknerLab.CW.FP/TONS
 CaldwellHall.CW.FP/TONS
+CampusStore.CW.ES749/TONS
 CampusStore.CW.FP/TONS
 CarlBeckerHouse.CW.FP/TONS
 CarpenterHall.CW.FP/TONS
@@ -18,6 +23,7 @@ ClarkHall.CW.FP/TONS
 ClinicalProgramsCenter.CW.FP/TONS
 ComputingCommunicationsCenter.CW.FP/TONS
 ComstockHall.CW.FP/TONS
+CorsonMuddComplex.CW.FleximF721/TONS
 CourtHall.CW.FP/TONS
 DayHall.CW.FP/TONS
 DuffieldHall.CW.FP/TONS
@@ -25,6 +31,7 @@ EastCampusResearchFacility.CW.FP/TONS
 EmersonHall.CW.FP/TONS
 FernowHall.CW.FP/TONS
 FloraRoseHouse.CW.FP/TONS
+Foundry.RandMER.FleximF721/CW.Tons
 FriedmanWrestlingCenter.CW.FP/TONS
 GannettHealthCenter.CW.FP/TONS
 GatesHall.CW.FP/TONS
@@ -32,12 +39,15 @@ GoldwinSmithHall.CW.FP/TONS
 GrummanHall.CW.FP/TONS
 HansBetheHouse.CW.FP/TONS
 HollisterHall.CW.FP/TONS
+HughesHall.CW.FleximF721/TONS
 HughesHall.CW.FP/TONS
 HumanEcologyBuilding.CW.FP/TONS
 HumphreysServiceBuilding.CW.FP/TONS
+HuShihHall.B0061.FleximF721/CW.Tons
 IthacaHighSchool.CW.FP/TONS
 IvesHall.CW.FP/TONS
 JohnsonMuseumOfArt.CW.FP/TONS
+KimballHall.CW.FleximF721/TONS
 KlarmanHall.CW.FP/TONS
 KrochLibrary.CW.FP/TONS
 LargeAnimalResearchTeachingUnit.CW.FP/TONS
@@ -46,6 +56,7 @@ LynahRink.CW.FP/TONS
 MalottHall.CW.FP/TONS
 MannLibrary.CW.FP/TONS
 MarthaVanRensselaerComplex.MAIN.CW.FP/TONS
+MarthaVanRensselaerWest.CW.FleximF704/TONS
 MilsteinHall.CW.FP/TONS
 MorrillHall.CW.FP/TONS
 MorrisonHall.CW.FP/TONS
@@ -66,6 +77,7 @@ RileyRobbHall.CW.FP/TONS
 RobertPurcellCommunityCenter.CW.FP/TONS
 RobertWHolleyCenter.CW.FP/TONS
 RockefellerHall.CW.FP/TONS
+RuthBaderGinsburgHall.B0069.FleximF721/CW.Tons
 SageHall.CW.FP/TONS
 SavageHall.CW.FP/TONS
 SchoellkopfHall.CW.FP/TONS
@@ -79,6 +91,8 @@ StatlerHall.CW.FP/TONS
 StatlerHotel.CW.FP/TONS
 StimsonHall.CW.FP/TONS
 StockingHall.CW.FP/TONS
+ToniMorrisonHall.Bsmt.FleximF721/CW.TONS
+ToniMorrisonHall.Coolers.CW.FleximF721/TONS
 UpsonHall.CW.FP/TONS
 UrisHall.CW.FP/TONS
 UrisLibrary.CW.FP/TONS
@@ -95,6 +109,9 @@ WeillHall.PlantGrowth.CW.FP/TONS
 WhiteHall.CW.FP/TONS
 WillardStraightHall.CW.FP/TONS
 WilliamKeetonHouse.CW.FP/TONS
+WilsonLab.400U.FleximF721/CW.CoolingLoops.Tons
+WilsonLab.400U.FleximF721/CW.ExperimentalHall.Tons
+WilsonLab.CW.FleximF721/TONS
 WilsonLab.CW.FP/TONS
 WingHall.CW.FP/TONS
 eof
