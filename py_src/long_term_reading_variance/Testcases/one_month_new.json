@@ -2890,16 +2890,3 @@
     "metric": "Chilled Water"
   }
 ]
-"""
-{
-  "range": {
-    "from": "2021-8-19",
-    "to": "2021-9-18"
-  },
-  "targets": [
-    {
-      "target": "CarpenterHall.CW.FP/TONS"
-    }
-  ]
-}
-"""
