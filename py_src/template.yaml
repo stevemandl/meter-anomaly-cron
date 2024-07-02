@@ -1,0 +1,38 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  meter-anomaly-cron-py
+Transform:
+- AWS::Serverless-2016-10-31
+Globals:
+  Function:
+    Runtime: python3.9
+    Architectures:
+      - x86_64
+    Timeout: 100
+    MemorySize: 128
+    Environment:
+      Variables:
+        SAM_STAGE: !Ref StageParameter
+        PORTAL_API_URL: !Ref APIURLParameter
+Parameters:
+  StageParameter:
+    Type: String
+  APIURLParameter:
+    Type: String
+Resources:  
+  PythonTemplate:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "meter-anomaly-py-${StageParameter}-pythonTemplate"
+      Description: Python Template
+      Handler: python_template/handler.run
+    Metadata:
+      BuildMethod: makefile
+  LowDeltaT:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "meter-anomaly-py-${StageParameter}-lowDeltaT"
+      Description: Low Delta T
+      Handler: low_delta_t/handler.run
+    Metadata:
+      BuildMethod: makefile

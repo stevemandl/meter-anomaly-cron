@@ -1,9 +1,0 @@
-# serverless-compose.yml
-services:
-  meter-anomaly-ts:
-    path: ts_src
-    params:
-      SLS_STAGE: ${sls:stage}
- 
-  meter-anomaly-py:
-    path: py_src
