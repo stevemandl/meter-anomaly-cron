@@ -59,7 +59,7 @@ one_month_old.json is a file containing the swagger JSON response from the follo
 
 one_month_new = open('long_term_reading_variance/Testcases/one_month_new.json')
 """
-one_month_old.json is a file containing the swagger JSON response from the following query 
+one_month_new.json is a file containing the swagger JSON response from the following query 
 {
   "range": {
     "from": "2021-8-19",
@@ -70,6 +70,36 @@ one_month_old.json is a file containing the swagger JSON response from the follo
       "target": "CarpenterHall.CW.FP/TONS"
     }
   ]
+}
+"""
+noanom_old = open('long_term_reading_variance/Testcases/noanom_old.json')
+"""
+noanom_old.json is a file containing the swagger JSON response from the following query 
+{
+   "range": {
+     "from": "2022-07-01",
+     "to": "2022-07-30"
+   },
+   "targets": [
+     {
+       "target": "BartonHall.CW.FP/TONS"
+     }
+   ]
+}
+"""
+noanom_new = open('long_term_reading_variance/Testcases/noanom_new.json')
+"""
+noanom_new.json is a file containing the swagger JSON response from the following query 
+{
+   "range": {
+     "from": "2023-07-01",
+     "to": "2023-07-30"
+   },
+   "targets": [
+     {
+       "target": "BartonHall.CW.FP/TONS"
+     }
+   ]
 }
 """
 
@@ -132,3 +162,24 @@ def test_one_month(mocker):
     result = run(event, None)
     assert "statusCode" in result
     assert "anomaly detected" == result.get("body")
+    
+def test_noanom(mocker):
+    event = {
+        "body": {
+            "pointName": "KlarmanHall.Elec.Solar.PowerScout3037/kW_System",
+            "timeStamp": "2022-10-05T23:58:47.390Z",
+        }
+    }
+    #data1 contains the data from the previous year 
+    #data2 contains the data from the target year
+    
+    data1 = json.load(noanom_old)
+    data2 = json.load(noanom_new)
+    
+    mocker.patch(
+        "python_template.handler.fetch_trends",
+        side_effect = [data1, data2]
+    )
+    result = run(event, None)
+    assert "statusCode" in result
+    assert "anomaly detected" == result.get("body") 
