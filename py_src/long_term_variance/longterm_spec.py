@@ -182,4 +182,4 @@ def test_noanom(mocker):
     )
     result = run(event, None)
     assert "statusCode" in result
-    assert "anomaly detected" == result.get("body") 
+    assert "" == result.get("body") 
