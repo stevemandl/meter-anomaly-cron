@@ -2794,15 +2794,3 @@
     "metric": "Chilled Water"
   }
 ]
-
-{
-   "range": {
-     "from": "2023-07-01",
-     "to": "2023-07-30"
-   },
-   "targets": [
-     {
-       "target": "BartonHall.CW.FP/TONS"
-     }
-   ]
-}
