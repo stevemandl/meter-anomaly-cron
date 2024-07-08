@@ -1,0 +1,85 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  meter-anomaly-cron-ts
+
+# Transform section specifies one or more macros that AWS CloudFormation uses to process your template
+# https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/transform-section-structure.html
+Transform:
+- AWS::Serverless-2016-10-31
+Globals:
+  Function:
+    Runtime: nodejs18.x
+    Architectures:
+      - x86_64
+    Timeout: 100
+    MemorySize: 1024
+Parameters:
+  EMCSAPIKEYParameter:
+    Type: String
+  StageParameter:
+    Type: String
+  APIURLParameter:
+    Type: String
+
+Resources:  
+  CronHandler:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "meter-anomaly-ts-${StageParameter}-cronHandler"
+      Description: Periodically checks to see what functions to invoke.
+      Handler: cron/handler.run
+      # This runs every hour.
+      Events:
+        CloudWatchEvent:
+          Type: Schedule
+          Properties:
+            Schedule: cron(0 * ? * * *)
+      Environment:
+        Variables:
+          EMCS_API_KEY: !Ref EMCSAPIKEYParameter
+          SAM_STAGE: !Ref StageParameter
+          API_URL: !Ref APIURLParameter
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-e622fc9e
+        SubnetIds:
+          - subnet-86efa4ac
+          - subnet-c2a07c8a
+      Policies:
+        - Version: 2012-10-17
+          Statement:
+          - Effect: Allow
+            Action:
+              - SNS:Publish
+            Resource: 'arn:aws:sns:us-east-1:498547149247:*'
+          - Effect: Allow
+            Action:
+              - lambda:InvokeFunction
+            Resource: 'arn:aws:lambda:us-east-1:498547149247:function:*'
+    Metadata: # Manage esbuild properties
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints: 
+        - cron/handler.ts    
+  TestTemplate:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "meter-anomaly-ts-${StageParameter}-tsTemplate"
+      Description: Test Template
+      Handler: testTemplate/handler.run
+      Environment:
+        Variables:
+          SAM_STAGE: !Ref StageParameter
+          API_URL: !Ref APIURLParameter
+    Metadata: # Manage esbuild properties
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints: 
+        - testTemplate/handler.ts    
+

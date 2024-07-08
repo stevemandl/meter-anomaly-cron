@@ -4,15 +4,10 @@ invoke.py
 script to invoke a python meter-anomaly algorithm
 """
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
-import yaml
 import re
 import importlib
 import time
-import os
 
-f = open("serverless.yml")
-sls = yaml.load(f, Loader=yaml.FullLoader)
-os.environ["PORTAL_API_URL"] = sls["provider"]["environment"]["PORTAL_API_URL"]
 FN_RE = r"(?P<pkg>\w+)/(?P<subpkg>\w+)\.(?P<fn>\w+)"
 
 if __name__ == "__main__":
@@ -39,10 +34,18 @@ if __name__ == "__main__":
         help="timeStamp (e.g. 'Jan 5, 2022' or 1676005200)",
     )
 
-    args = parser.parse_args()
-    print(
-        f"\ninvoke.py arguments:\n    function: {args.function}, pointName: {args.pointName}, timeStamp: {args.timeStamp} "
+    parser.add_argument(
+        "-q",
+        "--quiet",
+        action="store_true",
+        help="no output unless anomaly detected",
     )
+
+    args = parser.parse_args()
+    if not args.quiet:
+        print(
+            f"\ninvoke.py arguments:\n    function: {args.function}, pointName: {args.pointName}, timeStamp: {args.timeStamp} "
+        )
     event = {"body": {"pointName": args.pointName}}
     if args.timeStamp is not None:
         event["body"]["timeStamp"] = args.timeStamp
@@ -51,15 +54,15 @@ if __name__ == "__main__":
 
     pkg = importlib.import_module(f"{m.group('pkg')}.{m.group('subpkg')}")
     fn = getattr(pkg, m.group("fn"))
-    print(f"Calling function ...")
+    if not args.quiet: print(f"Calling function ...")
     start = time.time()
     result = fn(event, None)
     end = time.time()
-    print(f"Received response: '{result}'")
+    if not args.quiet: print(f"Received response: '{result}'")
     if result["statusCode"] == 200:
-        print("Algorithm executed without an error")
+        if not args.quiet: print("Algorithm executed without an error")
     if result["body"]:
         print(f"ANOMALY DETECTED: {result['body']}")
     else:
-        print("No anomaly was detected")
-    print(f"Function elapsed run time (seconds): '{end-start:.3}'.\n")
+        if not args.quiet: print("No anomaly was detected")
+    if not args.quiet: print(f"Function elapsed run time (seconds): '{end-start:.3}'.\n")
