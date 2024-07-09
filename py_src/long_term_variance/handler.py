@@ -46,11 +46,12 @@ def run(event, _context):
         year2 = fetch_trends(
             point=point_name, start_time=two_year_st, end_time=two_years_ago )
         a = np.array(year1[0]["datapoints"] + year2[0]["datapoints"])
-        if (a.size < MIN_DATAPOINTS_LENGTH) or (df.size < MIN_DATAPOINTS_LENGTH):
+        if (a.size < MIN_DATAPOINTS_LENGTH*2) or (df.size < MIN_DATAPOINTS_LENGTH):
             # not enough data to determine anomaly
             return response
         t_df = pd.DataFrame.from_records(a, columns = ("previous", "ts"), index="ts")
-        t_df.index = pd.to_datetime(t_df.index, unit='ms')
+        t_df.index = pd.to_datetime(t_df.index, unit='ms'
+        )
         df = df.merge(t_df, how="outer", on="ts").interpolate()
         # add column to separate time of day into 8 bins
         df["hour"] = df.index.hour
