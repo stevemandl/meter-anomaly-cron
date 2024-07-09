@@ -20,12 +20,12 @@ Parameters:
   APIURLParameter:
     Type: String
 Resources:  
-  PythonTemplate:
+  SparseData:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub "meter-anomaly-py-${StageParameter}-pythonTemplate"
-      Description: Python Template
-      Handler: python_template/handler.run
+      FunctionName: !Sub "meter-anomaly-py-${StageParameter}-sparseData"
+      Description: Sparse Data
+      Handler: sparse_data/handler.run
     Metadata:
       BuildMethod: makefile
   LowDeltaT:

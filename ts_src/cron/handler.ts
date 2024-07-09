@@ -33,8 +33,8 @@ const algorithms: AlgorithmCfg[] = [
         service: "meter-anomaly-py",
     },
     {
-        objListPoint: "MeterAnomaly.pythonTemplate.PointList",
-        fn: "pythonTemplate",
+        objListPoint: "MeterAnomaly.sparseData.PointList",
+        fn: "sparseData",
         service: "meter-anomaly-py",
     },
 ];
