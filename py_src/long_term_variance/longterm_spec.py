@@ -4,7 +4,7 @@ from requests.models import Response
 import json
 
 
-anom_3 = open('long_term_reading_variance/testcases/one_month_oldest.json')
+anom_3 = open('long_term_reading_variance/test_cases/one_month_oldest.json')
 """
 one_month_oldest.json is a file containing the swagger JSON response from the following query 
 {
@@ -19,7 +19,7 @@ one_month_oldest.json is a file containing the swagger JSON response from the fo
   ]
 }
 """
-anom_2 = open('long_term_reading_variance/testcases/one_month_old.json')
+anom_2 = open('long_term_reading_variance/test_cases/one_month_old.json')
 """
 one_month_old.json is a file containing the swagger JSON response from the following query 
 {
@@ -35,7 +35,7 @@ one_month_old.json is a file containing the swagger JSON response from the follo
 }
 """
 
-anom_1 = open('long_term_reading_variance/testcases/one_month_new.json')
+anom_1 = open('long_term_reading_variance/test_cases/one_month_new.json')
 """
 one_month_new.json is a file containing the swagger JSON response from the following query 
 {
@@ -50,7 +50,7 @@ one_month_new.json is a file containing the swagger JSON response from the follo
   ]
 }
 """
-noanom_3 = open('long_term_reading_variance/testcases/noanom_oldest.json')
+noanom_3 = open('long_term_reading_variance/test_cases/noanom_oldest.json')
 """
 noanom_oldest.json is a file containing the swagger JSON response from the following query 
 {
@@ -65,7 +65,7 @@ noanom_oldest.json is a file containing the swagger JSON response from the follo
    ]
 }
 """
-noanom_2 = open('long_term_reading_variance/testcases/noanom_old.json')
+noanom_2 = open('long_term_reading_variance/test_cases/noanom_old.json')
 """
 noanom_old.json is a file containing the swagger JSON response from the following query 
 {
@@ -80,7 +80,7 @@ noanom_old.json is a file containing the swagger JSON response from the followin
    ]
 }
 """
-noanom_1 = open('long_term_reading_variance/testcases/noanom_new.json')
+noanom_1 = open('long_term_reading_variance/test_cases/noanom_new.json')
 """
 noanom_new.json is a file containing the swagger JSON response from the following query 
 {
