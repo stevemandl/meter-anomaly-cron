@@ -3,45 +3,23 @@ from requests.exceptions import HTTPError
 from requests.models import Response
 import json
 
-# }
-five_months_old = open('long_term_reading_variance/Testcases/five_months_old.json')
-"""
-five_months_old.json is a file containing the swagger JSON response from the following query 
-{
-  "range": {
-    "from": "2019-04-01T19:38:47.334Z",
-    "to": "2019-04-30T19:38:47.334Z"
-  },
-  "interval": "30s",
-  "intervalMs": 5500,
-  "maxDataPoints": 50,
-  "targets": [
-    {
-      "target": "BakerLab.Elec.South.PowerScout3/kW_System"
-    }
-  ]
-}
-"""
-five_months_new = open('long_term_reading_variance/Testcases/five_months_new.json')
-"""
-five_months_new.json is a file containing the swagger JSON response from the following query 
-{
-  "range": {
-    "from": "2020-04-01T19:38:47.334Z",
-    "to": "2020-04-30T19:38:47.334Z"
-  },
-  "interval": "30s",
-  "intervalMs": 5500,
-  "maxDataPoints": 50,
-  "targets": [
-    {
-      "target": "BakerLab.Elec.South.PowerScout3/kW_System"
-    }
-  ]
-}
-"""
 
-one_month_old = open('long_term_reading_variance/Testcases/one_month_old.json')
+anom_3 = open('long_term_reading_variance/testcases/one_month_oldest.json')
+"""
+one_month_oldest.json is a file containing the swagger JSON response from the following query 
+{
+  "range": {
+    "from": "2019-8-19",
+    "to": "2019-9-18"
+  },
+  "targets": [
+    {
+      "target": "CarpenterHall.CW.FP/TONS"
+    }
+  ]
+}
+"""
+anom_2 = open('long_term_reading_variance/testcases/one_month_old.json')
 """
 one_month_old.json is a file containing the swagger JSON response from the following query 
 {
@@ -57,7 +35,7 @@ one_month_old.json is a file containing the swagger JSON response from the follo
 }
 """
 
-one_month_new = open('long_term_reading_variance/Testcases/one_month_new.json')
+anom_1 = open('long_term_reading_variance/testcases/one_month_new.json')
 """
 one_month_new.json is a file containing the swagger JSON response from the following query 
 {
@@ -72,7 +50,22 @@ one_month_new.json is a file containing the swagger JSON response from the follo
   ]
 }
 """
-noanom_old = open('long_term_reading_variance/Testcases/noanom_old.json')
+noanom_3 = open('long_term_reading_variance/testcases/noanom_oldest.json')
+"""
+noanom_oldest.json is a file containing the swagger JSON response from the following query 
+{
+   "range": {
+     "from": "2021-07-01",
+     "to": "2021-07-30"
+   },
+   "targets": [
+     {
+       "target": "BartonHall.CW.FP/TONS"
+     }
+   ]
+}
+"""
+noanom_2 = open('long_term_reading_variance/testcases/noanom_old.json')
 """
 noanom_old.json is a file containing the swagger JSON response from the following query 
 {
@@ -87,7 +80,7 @@ noanom_old.json is a file containing the swagger JSON response from the followin
    ]
 }
 """
-noanom_new = open('long_term_reading_variance/Testcases/noanom_new.json')
+noanom_1 = open('long_term_reading_variance/testcases/noanom_new.json')
 """
 noanom_new.json is a file containing the swagger JSON response from the following query 
 {
@@ -103,6 +96,8 @@ noanom_new.json is a file containing the swagger JSON response from the followin
 }
 """
 
+
+
 def test_onetime(mocker):
     event = {
         "body": {
@@ -110,54 +105,37 @@ def test_onetime(mocker):
             "timeStamp": "2022-10-05T23:58:47.390Z",
         }
     }
-    #data1 contains the data from the previous year 
-    #data2 contains the data from the target year
-    data1 = json.load(five_months_old)
-    data2 = [{"datapoints": []}]
+    #data_current contains the current data from when the algorithm was executed
+    #data1 contains the data from the previous year
+    #data2 contains the data from two years prior
+    data_current = json.load(noanom_1)
+    data1 = [{"datapoints": []}]
+    data2 = json.load(noanom_3)
     mocker.patch(
         "python_template.handler.fetch_trends",
-        side_effect = [data1, data2]
+        side_effect = [data_current, data1, data2]
     )
     result = run(event, None)
     assert "statusCode" in result
     assert "missing timeframe" == result.get("body")
     
-def test_five_months(mocker):
+def test_anom(mocker):
     event = {
         "body": {
             "pointName": "KlarmanHall.Elec.Solar.PowerScout3037/kW_System",
             "timeStamp": "2022-10-05T23:58:47.390Z",
         }
     }
-    #data1 contains the data from the previous year 
-    #data2 contains the data from the target year
-    data1 = json.load(five_months_old)
-    data2 = json.load(five_months_new)
+    #data_current contains the current data from when the algorithm was executed
+    #data1 contains the data from the previous year
+    #data2 contains the data from two years prior
     
+    data_current = json.load(anom_1)
+    data1 = json.load(anom_2)
+    data2 = json.load(anom_3)
     mocker.patch(
         "python_template.handler.fetch_trends",
-        side_effect = [data1, data2]
-    )
-    result = run(event, None)
-    assert "statusCode" in result
-    assert "anomaly detected" == result.get("body")
-    
-def test_one_month(mocker):
-    event = {
-        "body": {
-            "pointName": "KlarmanHall.Elec.Solar.PowerScout3037/kW_System",
-            "timeStamp": "2022-10-05T23:58:47.390Z",
-        }
-    }
-    #data1 contains the data from the previous year 
-    #data2 contains the data from the target year
-    
-    data1 = json.load(one_month_old)
-    data2 = json.load(one_month_new)
-    
-    mocker.patch(
-        "python_template.handler.fetch_trends",
-        side_effect = [data1, data2]
+        side_effect = [data_current, data1, data2]
     )
     result = run(event, None)
     assert "statusCode" in result
@@ -170,15 +148,15 @@ def test_noanom(mocker):
             "timeStamp": "2022-10-05T23:58:47.390Z",
         }
     }
-    #data1 contains the data from the previous year 
-    #data2 contains the data from the target year
-    
-    data1 = json.load(noanom_old)
-    data2 = json.load(noanom_new)
-    
+    #data_current contains the current data from when the algorithm was executed
+    #data1 contains the data from the previous year
+    #data2 contains the data from two years prior
+    data_current = json.load(noanom_1)
+    data1 = json.load(noanom_2)
+    data2 = json.load(noanom_3)
     mocker.patch(
         "python_template.handler.fetch_trends",
-        side_effect = [data1, data2]
+        side_effect = [data_current, data1, data2]
     )
     result = run(event, None)
     assert "statusCode" in result
