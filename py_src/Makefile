@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-build-SparseData build-LowDeltaT:
+build-SparseData build-LowDeltaT StuckTwoDay:
 	cp -r ./* $(ARTIFACTS_DIR)
 	pip install --upgrade pip
 	pip install pipenv

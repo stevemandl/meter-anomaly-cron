@@ -37,6 +37,11 @@ const algorithms: AlgorithmCfg[] = [
         fn: "sparseData",
         service: "meter-anomaly-py",
     },
+    {
+        objListPoint: "MeterAnomaly.stuckTwoDay.PointList",
+        fn: "stuckTwoDay",
+        service: "meter-anomaly-py",
+    },
 ];
 
 // fetchPoints(cfg)
