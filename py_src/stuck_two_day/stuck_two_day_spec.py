@@ -1,10 +1,10 @@
 """
- same_value_spec.py
+ stuck_two_day_spec.py
 """
 import json
 from requests.exceptions import HTTPError
 from requests.models import Response
-from same_value.handler import run
+from stuck_two_day.handler import run
 # See swagger docs at https://app.swaggerhub.com/apis/Cornell-BACSI/EMCS-portal/1.0.0
 
 # stuck.json contains the response from the following JSON request body:
@@ -21,7 +21,7 @@ from same_value.handler import run
    ]
  }
 """
-stuck_value_testcase = open('same_value/test_cases/stuck.json')
+stuck_value_testcase = open('stuck_two_day/test_cases/stuck.json')
 
 # not_stuck.json contains the response from the following JSON request body:
 """ 
@@ -37,7 +37,7 @@ stuck_value_testcase = open('same_value/test_cases/stuck.json')
    ]
 }
 """
-noanomaly_testcase = open('same_value/test_cases/not_stuck.json')
+noanomaly_testcase = open('stuck_two_day/test_cases/not_stuck.json')
 
 def test_nobarf(mocker):
     event = {
@@ -47,7 +47,7 @@ def test_nobarf(mocker):
         }
     }
     mocker.patch(
-        "same_value.handler.fetch_trends",
+        "stuck_two_day.handler.fetch_trends",
         return_value= [{"datapoints": []}],
     )
     
@@ -63,7 +63,7 @@ def test_handle400(mocker):
     r.status_code = 400
     r._content = b'{"error":"No data"}'
     mocker.patch(
-        "same_value.handler.fetch_trends", side_effect=HTTPError(response=r)
+        "stuck_two_day.handler.fetch_trends", side_effect=HTTPError(response=r)
     )
     event = {"body": {"pointName": "foo"}}
     result = run(event, None)
@@ -76,7 +76,7 @@ def test_barf(mocker):
     r.status_code = 400
     r._content = b"qwerty"
     mocker.patch(
-        "same_value.handler.fetch_trends", side_effect=HTTPError(response=r)
+        "stuck_two_day.handler.fetch_trends", side_effect=HTTPError(response=r)
     )
     event = {"body": {"pointName": "foo"}}
     result = run(event, None)
@@ -92,7 +92,7 @@ def test_noanomly(mocker):
     }
     data = json.load(noanomaly_testcase)
     mocker.patch(
-        "same_value.handler.fetch_trends",
+        "stuck_two_day.handler.fetch_trends",
         return_value = data,
     )
     result = run(event, None)
@@ -108,7 +108,7 @@ def test_stuck_value(mocker):
     }
     data = json.load(stuck_value_testcase)
     mocker.patch(
-        "same_value.handler.fetch_trends",
+        "stuck_two_day.handler.fetch_trends",
         return_value = data,
     )
     result = run(event, None)
