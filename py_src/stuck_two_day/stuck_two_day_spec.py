@@ -114,4 +114,3 @@ def test_stuck_value(mocker):
     result = run(event, None)
     assert "statusCode" in result
     assert "stuck at value" in result.get("body")
-    
