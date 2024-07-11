@@ -62,7 +62,6 @@ def run(event, _context):
         result = df.groupby(["hourbin"], as_index=False).agg({"previous": ["mean", "std"], point_name: ["mean"]})
         result.columns=['bin','prev_mean','prev_std','curr_mean']
         result["z"]=(result["curr_mean"] - result["prev_mean"])/result["prev_std"]
-        print(result)
         anomoly_count = result.loc[lambda x: np.abs(x["z"]) > Z_SCORE_THRESHOLD]["z"].size
         # return anomaly if magnitude of z score is greater than threshold
         if anomoly_count > (hourbins.size * ANOMALY_PORTION):
