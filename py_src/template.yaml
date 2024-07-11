@@ -44,3 +44,11 @@ Resources:
       Handler: long_term_variance/handler.run
     Metadata:
       BuildMethod: makefile
+  StuckTwoDay:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "meter-anomaly-py-${StageParameter}-stuckTwoDay"
+      Description: Stuck Value Two Day
+      Handler: stuck_two_day/handler.run
+    Metadata:
+      BuildMethod: makefile
