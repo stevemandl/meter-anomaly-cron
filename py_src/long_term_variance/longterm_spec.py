@@ -1,10 +1,10 @@
-from python_template.handler import run
+from long_term_variance.handler import run
 from requests.exceptions import HTTPError
 from requests.models import Response
 import json
 
 
-anom_3 = open('long_term_reading_variance/test_cases/one_month_oldest.json')
+anom_3 = open('long_term_variance/test_cases/one_month_oldest.json')
 """
 one_month_oldest.json is a file containing the swagger JSON response from the following query 
 {
@@ -19,7 +19,7 @@ one_month_oldest.json is a file containing the swagger JSON response from the fo
   ]
 }
 """
-anom_2 = open('long_term_reading_variance/test_cases/one_month_old.json')
+anom_2 = open('long_term_variance/test_cases/one_month_old.json')
 """
 one_month_old.json is a file containing the swagger JSON response from the following query 
 {
@@ -35,7 +35,7 @@ one_month_old.json is a file containing the swagger JSON response from the follo
 }
 """
 
-anom_1 = open('long_term_reading_variance/test_cases/one_month_new.json')
+anom_1 = open('long_term_variance/test_cases/one_month_new.json')
 """
 one_month_new.json is a file containing the swagger JSON response from the following query 
 {
@@ -50,7 +50,7 @@ one_month_new.json is a file containing the swagger JSON response from the follo
   ]
 }
 """
-noanom_3 = open('long_term_reading_variance/test_cases/noanom_oldest.json')
+noanom_3 = open('long_term_variance/test_cases/noanom_oldest.json')
 """
 noanom_oldest.json is a file containing the swagger JSON response from the following query 
 {
@@ -65,7 +65,7 @@ noanom_oldest.json is a file containing the swagger JSON response from the follo
    ]
 }
 """
-noanom_2 = open('long_term_reading_variance/test_cases/noanom_old.json')
+noanom_2 = open('long_term_variance/test_cases/noanom_old.json')
 """
 noanom_old.json is a file containing the swagger JSON response from the following query 
 {
@@ -80,7 +80,7 @@ noanom_old.json is a file containing the swagger JSON response from the followin
    ]
 }
 """
-noanom_1 = open('long_term_reading_variance/test_cases/noanom_new.json')
+noanom_1 = open('long_term_variance/test_cases/noanom_new.json')
 """
 noanom_new.json is a file containing the swagger JSON response from the following query 
 {
@@ -96,67 +96,67 @@ noanom_new.json is a file containing the swagger JSON response from the followin
 }
 """
 
+data_noanom_1 = json.load(noanom_1)
+data_noanom_2 = json.load(noanom_2)
+data_noanom_3 = json.load(noanom_3)
+data_anom_1 = json.load(anom_1)
+data_anom_2 = json.load(anom_2)
+data_anom_3 = json.load(anom_3)
 
 
 def test_onetime(mocker):
     event = {
         "body": {
-            "pointName": "KlarmanHall.Elec.Solar.PowerScout3037/kW_System",
-            "timeStamp": "2022-10-05T23:58:47.390Z",
+            "pointName": "BartonHall.CW.FP/TONS",
+            "timeStamp": "2023-07-30",
         }
     }
     #data_current contains the current data from when the algorithm was executed
     #data1 contains the data from the previous year
     #data2 contains the data from two years prior
-    data_current = json.load(noanom_1)
     data1 = [{"datapoints": []}]
-    data2 = json.load(noanom_3)
     mocker.patch(
-        "python_template.handler.fetch_trends",
-        side_effect = [data_current, data1, data2]
+        "long_term_variance.handler.fetch_trends",
+        side_effect = [data_noanom_1, data1, data_noanom_3]
     )
     result = run(event, None)
     assert "statusCode" in result
-    assert "missing timeframe" == result.get("body")
+    # if not enough data is present to be conclusive, 
+    # we expect the algorithm to return no anomaly
+    assert "" == result.get("body")
     
 def test_anom(mocker):
     event = {
         "body": {
-            "pointName": "KlarmanHall.Elec.Solar.PowerScout3037/kW_System",
-            "timeStamp": "2022-10-05T23:58:47.390Z",
+            "pointName": "CarpenterHall.CW.FP/TONS",
+            "timeStamp": "2021-9-18",
         }
     }
     #data_current contains the current data from when the algorithm was executed
     #data1 contains the data from the previous year
     #data2 contains the data from two years prior
     
-    data_current = json.load(anom_1)
-    data1 = json.load(anom_2)
-    data2 = json.load(anom_3)
     mocker.patch(
-        "python_template.handler.fetch_trends",
-        side_effect = [data_current, data1, data2]
+        "long_term_variance.handler.fetch_trends",
+        side_effect = [data_anom_1, data_anom_2, data_anom_3]
     )
     result = run(event, None)
     assert "statusCode" in result
-    assert "anomaly detected" == result.get("body")
+    assert "Anomaly Detected" in result.get("body")
     
 def test_noanom(mocker):
     event = {
         "body": {
-            "pointName": "KlarmanHall.Elec.Solar.PowerScout3037/kW_System",
-            "timeStamp": "2022-10-05T23:58:47.390Z",
+            "pointName": "BartonHall.CW.FP/TONS",
+            "timeStamp": "2023-07-30",
         }
     }
     #data_current contains the current data from when the algorithm was executed
     #data1 contains the data from the previous year
     #data2 contains the data from two years prior
-    data_current = json.load(noanom_1)
-    data1 = json.load(noanom_2)
-    data2 = json.load(noanom_3)
     mocker.patch(
-        "python_template.handler.fetch_trends",
-        side_effect = [data_current, data1, data2]
+        "long_term_variance.handler.fetch_trends",
+        side_effect = [data_noanom_1, data_noanom_2, data_noanom_3]
     )
     result = run(event, None)
     assert "statusCode" in result

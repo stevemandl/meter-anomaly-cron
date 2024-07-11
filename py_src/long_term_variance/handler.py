@@ -75,7 +75,7 @@ def run(event, _context):
     except AnomalyError as err:
         response[
             "body"
-        ] = f"""{point_name} Error: {err} {start_time:%Y-%m-%d %H:%M} to {now:%Y-%m-%d %H:%M}"""
+        ] = f"""{point_name} Anomaly Detected: {err} {start_time:%Y-%m-%d %H:%M} to {now:%Y-%m-%d %H:%M}"""
     except HTTPError as err:
         response[
             "body"
