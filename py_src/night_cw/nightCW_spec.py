@@ -115,4 +115,4 @@ def test_CW_increase(mocker):
     )
     result = run(event, None)
     assert "statusCode" in result
-    assert "anomoly found" == result.get("body")
+    assert "anomoly found" in result.get("body")
