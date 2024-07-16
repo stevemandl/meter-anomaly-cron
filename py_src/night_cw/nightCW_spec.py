@@ -4,7 +4,7 @@ from requests.models import Response
 import json
 
 
-anom_case = open('Night_CW_Algorithm/Testcases/decrease.json')
+anom_case = open('night_cw/testcases/decrease.json')
 """
 decrease.json contains the reponse from the following JSON request body:
 {
@@ -24,7 +24,7 @@ decrease.json contains the reponse from the following JSON request body:
 }
 """
 
-noanom_case = open('Night_CW_Algorithm/testcases/increase.json')
+noanom_case = open('night_cw/testcases/increase.json')
 """
 increase.json contains the reponse from the following JSON request body:
 {
