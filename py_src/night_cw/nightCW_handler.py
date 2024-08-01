@@ -1,7 +1,8 @@
 # python_template/handler.py
 from datetime import datetime, timedelta
 from requests.exceptions import ConnectionError, HTTPError
-
+import numpy as np
+from scipy.stats import norm
 from python_lib.utils import parse_event, fetch_trends
 import json
 
@@ -23,16 +24,24 @@ def run(event, context):
         )
         # at this point, status_code must be 200 or an exception would be raised
         # data should always be there, but just to be on the safe side, make an if statement
-        if type(trend_response) is list:
-            # this is the logic in the anomaly detection:
-            if len(trend_response[0]["datapoints"]) < 648:
-                response[
-                    "body"
-                ] = f"{point_name} is missing more than 10% of values for the period {start_time:%Y-%m-%d %H:%M} to {end_time:%Y-%m-%d %H:%M}"
-        else:  # response should always be a list
+        datapoints = trend_response[0]["datapoints"]
+        target_range = 7
+        #target_range is the number of back from today that are being considered
+        threshhold = 0.3
+        #threshhold is the cumulative distribution percentage that is the baseline
+        for i in range(target_range):
+            datapoints.pop()
+        #removes the target data from the data that will be used to create the baseline
+        baseload = datapoints.ppf(threshhold)
+        #.ppf function returns the value at the cumulative distribution threshhold
+        target = trend_response[0]["datapoints"][(len(datapoints)-1):]
+        #extracts the target points from the trend response
+        if target.ppf(threshhold) > baseload:
             response[
                 "body"
-            ] = f"{point_name} unexpected error: missing response list for the period {start_time:%Y-%m-%d %H:%M} to {end_time:%Y-%m-%d %H:%M}"
+                ] = f"""{point_name} has a baseload {target.ppf(threshhold)} which is greater than the previous baseload{baseload}
+                    for the period {start_time:%Y-%m-%d %H:%M} to {end_time:%Y-%m-%d %H:%M}"""
+        #returns the response when the target baseload has increased.
     except ConnectionError as err:
         response[
             "body"
