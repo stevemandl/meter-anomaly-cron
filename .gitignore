@@ -6,3 +6,4 @@ coverage
 *.pyc
 .pytest_cache
 .aws-sam
+*.egg-info/
