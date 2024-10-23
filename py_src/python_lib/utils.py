@@ -92,11 +92,14 @@ def build_df(response, interpolate = True):
     df = pd.DataFrame()
     for t in response:
         a = np.array(t["datapoints"])
+        if a.size == 0:
+            continue
         t_df = pd.DataFrame.from_records(a, columns = (t["target"], "ts"), index="ts")
         if df.empty:
             df = t_df
         else:
             df = df.merge(t_df, how="outer", on="ts")
+    df.index = pd.to_datetime(df.index, unit='ms')
     if interpolate:
         return df.interpolate()
     return df

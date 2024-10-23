@@ -1,9 +1,10 @@
 # python_lib/utils_spec.py
 
-from python_lib.utils import parse_event, fetch_trends, build_index
+from pandas.api import types
 from datetime import datetime
 from requests.models import Response
 import pytest
+from python_lib.utils import parse_event, fetch_trends, build_index, build_df
 
 
 def test_parse_event():
@@ -56,7 +57,7 @@ def test_fetch_trends(mocker):
     assert "data" in result
 
 def test_build_index():
-    empty_trends = [{ "datapoints": [] }]
+    empty_trends = [{ "target": "A", "datapoints": [] }]
     empty_idx = build_index(empty_trends)
     assert not empty_idx
     single_trends = [{ "target": "A", "datapoints": [[ 1.5, 1000 ], [3.5, 1600 ]] }]
@@ -68,3 +69,13 @@ def test_build_index():
     assert "A" in multi_idx and "B" in multi_idx
     assert multi_idx["A"][5000] == 1.5
     assert multi_idx["B"][2600] == 4.5
+
+def test_build_df():
+    empty_trends = [{ "target": "A", "datapoints": [] }]
+    empty_df = build_df(empty_trends)
+    assert empty_df.empty
+    multi_trends = [{ "target": "A", "datapoints": [[ 1.5, 3600000 ], [3.5, 7200000 ]] },{ "target": "B", "datapoints": [[ 2.5, 3600000 ], [4.5, 3660000 ]] }]
+    multi_df = build_df(multi_trends)
+    assert multi_df.iloc[1,0] == 2.5
+    assert multi_df.iloc[2,1] == 4.5
+    assert types.is_datetime64_any_dtype(multi_df.index)

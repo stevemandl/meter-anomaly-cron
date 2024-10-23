@@ -60,9 +60,12 @@ def run(event, _context):
         model_df["DT_PRED"] =  (model_df["PLR"] ** 0.173) * (model_df["PT"] ** 0.067) * 15.603
         # compare actual delta-t with modeled normal, and detect anomaly if it falls below model by more than variance
         actual_dt = np.mean(model_df[rtemp_name] - model_df[stemp_name])
+        weighted_actual_dt = np.average(model_df[rtemp_name] - model_df[stemp_name], weights=model_df[flow_name])
         model_dt = np.mean(model_df["DT_PRED"])
+        weighted_model_dt = np.average(model_df["DT_PRED"], weights=model_df[flow_name])
         if actual_dt < model_dt * 0.9:
-            response[ "body" ] = f"""{point_name} actual_dt {actual_dt:.2f} model_dt {model_dt:.2f} for the period {start_time:%Y-%m-%d %H:%M} to {now:%Y-%m-%d %H:%M}"""
+            actual_pct = actual_dt / model_dt
+            response[ "body" ] = f"""{point_name} actual_pct {actual_pct:.2%} {actual_dt:.2f}/{model_dt:.2f} weighted {weighted_actual_dt:.2f}/{weighted_model_dt:.2f} for the period {start_time:%Y-%m-%d %H:%M} to {now:%Y-%m-%d %H:%M}"""
     except RequestConnectionError as err:
         response[
             "body"

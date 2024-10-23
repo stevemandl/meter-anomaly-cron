@@ -11,6 +11,7 @@ numpy = "*"
 pandas = "*"
 matplotlib = "*"
 tk = "*"
+pythonlib = {file = "python_lib"}
 
 [dev-packages]
 pytest = {version=">=6.2"}

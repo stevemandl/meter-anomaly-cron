@@ -36,6 +36,14 @@ Resources:
       Handler: low_delta_t/handler.run
     Metadata:
       BuildMethod: makefile
+  LongTermVariance:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "meter-anomaly-py-${StageParameter}-longTermVariance"
+      Description: Long Term Variance
+      Handler: long_term_variance/handler.run
+    Metadata:
+      BuildMethod: makefile
   StuckTwoDay:
     Type: AWS::Serverless::Function
     Properties:

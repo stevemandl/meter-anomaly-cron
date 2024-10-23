@@ -111,4 +111,4 @@ def test_anomaly(mocker):
     )
     result = run(event, None)
     assert "statusCode" in result
-    assert "ClarkHall.CW.FP/TONS actual_dt" in result.get("body")
+    assert "ClarkHall.CW.FP/TONS actual_pct" in result.get("body")
