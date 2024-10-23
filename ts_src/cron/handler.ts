@@ -2,7 +2,6 @@
 import axios from "axios";
 import { Lambda, SNS } from "aws-sdk";
 import Redis from "ioredis";
-import { AlgorithmCfg, ObjList } from "../types";
 
 const API_KEY: string | undefined = process.env.EMCS_API_KEY;
 const SECRET_TOKEN: string | undefined = process.env.SECRET_TOKEN;
