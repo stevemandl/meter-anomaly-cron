@@ -52,11 +52,10 @@ def test_nobarf(mocker):
     )
     
     result = run(event, None)
-    assert "statusCode" in result
     # this algorithm is not checking for missing data; only stuck data
     # so an empty dataset is not detected as a stuck anomaly
-    assert not result.get("body")
-
+    assert not result
+ 
 
 def test_handle400(mocker):
     r = Response()
@@ -67,8 +66,7 @@ def test_handle400(mocker):
     )
     event = {"body": {"pointName": "foo"}}
     result = run(event, None)
-    assert "statusCode" in result
-    assert "no data" in result.get("body")
+    assert "No data" in result["description"]
 
 
 def test_barf(mocker):
@@ -80,8 +78,7 @@ def test_barf(mocker):
     )
     event = {"body": {"pointName": "foo"}}
     result = run(event, None)
-    assert "statusCode" in result
-    assert "qwerty" in result.get("body")
+    assert "qwerty" in result["error"]
 
 def test_noanomly(mocker):
     event = {
@@ -96,8 +93,8 @@ def test_noanomly(mocker):
         return_value = data,
     )
     result = run(event, None)
-    assert "statusCode" in result
-    assert "" == result.get("body")
+    assert not result
+
 
 def test_stuck_value(mocker):
     event = {
@@ -112,5 +109,5 @@ def test_stuck_value(mocker):
         return_value = data,
     )
     result = run(event, None)
-    assert "statusCode" in result
-    assert "stuck at value" in result.get("body")
+    assert "Stuck at value" in result["description"]
+
