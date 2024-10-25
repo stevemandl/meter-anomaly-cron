@@ -62,8 +62,7 @@ def test_handle400(mocker):
     mocker.patch("low_delta_t.handler.fetch_trends", side_effect=HTTPError(response=r))
     event = {"body": {"pointName": "foo/TONS"}}
     result = run(event, None)
-    assert "statusCode" in result
-    assert "no data" in result.get("body")
+    assert "No data" in result["description"]
 
 
 def test_barf(mocker):
@@ -73,8 +72,7 @@ def test_barf(mocker):
     mocker.patch("low_delta_t.handler.fetch_trends", side_effect=HTTPError(response=r))
     event = {"body": {"pointName": "foo/Tons"}}
     result = run(event, None)
-    assert "statusCode" in result
-    assert "qwerty" in result.get("body")
+    assert "qwerty" in result["error"]
 
 
 def test_normal(mocker):
@@ -92,8 +90,7 @@ def test_normal(mocker):
         side_effect=[normal_tons_data, normal_temps_flows_data],
     )
     result = run(event, None)
-    assert "statusCode" in result
-    assert "" == result.get("body")
+    assert not result
 
 
 def test_anomaly(mocker):
@@ -110,5 +107,4 @@ def test_anomaly(mocker):
         side_effect=[anom_tons_data, anom_temps_flows_data],
     )
     result = run(event, None)
-    assert "statusCode" in result
-    assert "ClarkHall.CW.FP/TONS actual_pct" in result.get("body")
+    assert "DeltaT/ModelDT" in result["description"]
