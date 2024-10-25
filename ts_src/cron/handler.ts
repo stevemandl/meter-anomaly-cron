@@ -16,7 +16,6 @@ if (process.env.IS_OFFLINE) {
     endpoint = "http://localhost:3001";
     sslEnabled = false;
 }
-console.log(`IS_OFFLINE: ${process.env.IS_OFFLINE} Using endpoint ${endpoint}`)
 const lambda = new Lambda({
     apiVersion: "2015-03-31",
     endpoint,
