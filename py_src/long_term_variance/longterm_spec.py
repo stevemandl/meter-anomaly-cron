@@ -179,4 +179,4 @@ def test_http_error_400_no_data(mocker):
     )
     
     result = run(event, None)
-    assert "No data" in result["description"]
+    assert not result

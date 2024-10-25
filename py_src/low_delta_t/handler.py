@@ -11,7 +11,7 @@ from python_lib.utils import parse_event, fetch_trends, build_index, build_df, A
 MIN_DATAPOINTS_LENGTH = int(7 * 24)
 RECENT_DAYS = 2
 ALGORITHM = "low_delta_t"
-ANOMALY_THRESHOLD = 0.9
+ANOMALY_THRESHOLD = 0.6
 
 def run(event, _context):
     """
@@ -43,11 +43,11 @@ def run(event, _context):
     try:
         # fetch previous year's tons for the meter
         tons = build_index(fetch_trends(
-            point=point_name, start_time=year_ago, end_time=now, additional= ["aggH"]
+            point=point_name, start_time=year_ago, end_time=end_time, additional= ["aggH"]
         ))
         # fetch recent period STEMP, RTEMP, FLOW, TONS, OAT
         recent_points = (stemp_name, rtemp_name, flow_name, tons_name, oat_name)
-        recent = fetch_trends(points=recent_points,start_time=start_time, end_time=now)
+        recent = fetch_trends(points=recent_points,start_time=start_time, end_time=end_time)
 
         # compute estimated design load from max(tons) over past year
         max_tons = max(tons[point_name].values())
