@@ -71,7 +71,7 @@ def test_barf(mocker):
     r.status_code = 400
     r._content = b"qwerty"
     mocker.patch("low_delta_t.handler.fetch_trends", side_effect=HTTPError(response=r))
-    event = {"body": {"pointName": "foo/TONS"}}
+    event = {"body": {"pointName": "foo/Tons"}}
     result = run(event, None)
     assert "statusCode" in result
     assert "qwerty" in result.get("body")
