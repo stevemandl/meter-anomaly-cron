@@ -120,10 +120,9 @@ def test_onetime(mocker):
         side_effect = [data_noanom_1, data1, data_noanom_3]
     )
     result = run(event, None)
-    assert "statusCode" in result
     # if not enough data is present to be conclusive, 
     # we expect the algorithm to return no anomaly
-    assert "" == result.get("body")
+    assert not result
     
 def test_anom(mocker):
     event = {
@@ -141,8 +140,7 @@ def test_anom(mocker):
         side_effect = [data_anom_1, data_anom_2, data_anom_3]
     )
     result = run(event, None)
-    assert "statusCode" in result
-    assert "Anomaly Detected" in result.get("body")
+    assert "z score over" in result["description"]
     
 def test_noanom(mocker):
     event = {
@@ -159,8 +157,7 @@ def test_noanom(mocker):
         side_effect = [data_noanom_1, data_noanom_2, data_noanom_3]
     )
     result = run(event, None)
-    assert "statusCode" in result
-    assert "" == result.get("body") 
+    assert not result
 
 def test_http_error_400_no_data(mocker):
     event = {
@@ -182,5 +179,4 @@ def test_http_error_400_no_data(mocker):
     )
     
     result = run(event, None)
-    assert "statusCode" in result
-    assert "TestPoint has no data" in result.get("body")
+    assert "No data" in result["description"]
