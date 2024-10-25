@@ -1,6 +1,6 @@
 // anomalyDB.ts
 // tools for interacting with the meter_anomalies table
-import mysql from 'mysql2/promise';
+import { QueryResult, ResultSetHeader, RowDataPacket, createPool } from 'mysql2/promise';
 
 
 // for connectivity to the trend database
@@ -12,7 +12,7 @@ const dbConfig = {
 	password: process.env.TRENDDB_PASSWORD,
 	database: process.env.TRENDDB
 };
-export const pool = mysql.createPool(dbConfig);
+export const pool = createPool(dbConfig);
 
 // object literal acts as singleton export
 
@@ -24,8 +24,8 @@ function now() {
 export async function getAnomalies(algorithm: string = "%", point: string = "%", openOnly: boolean = true) {
     const sql = 'select jdoc from meter_anomalies where _point like ? and _algorithm like ?'
         + (openOnly ? ' and _clear_ts is null' : '');
-    const results = await pool.query(sql, [point, algorithm]);
-    return results.rows.map(r => r.jdoc);
+    const [result] = await pool.query<{jdoc: MeterAnomaly}[] & RowDataPacket[]>(sql, [point, algorithm]);
+    return result.map(r => r.jdoc);
 }
 
 export async function clearAnomaly(id: number) {
@@ -34,10 +34,10 @@ export async function clearAnomaly(id: number) {
         [now(), id]
     );
 }
-export async function clearAllAnomalies() {
+export async function clearAllAnomalies(algorithm: string = "%", point: string = "%") {
     await pool.query(
-        "UPDATE meter_anomalies SET jdoc = JSON_SET(jdoc, '$.clear_ts', ?)",
-        [now()]
+        "UPDATE meter_anomalies SET jdoc = JSON_SET(jdoc, '$.clear_ts', ?) where _algorithm like ? and _point like ? and _clear_ts is null",
+        [now(), algorithm, point]
     );
 }
 export async function deleteAnomaly(id: number) {
@@ -52,17 +52,17 @@ export async function deleteAllAnomalies() {
     );
 }
 export async function addAnomaly(jdoc: MeterAnomaly) {
-    const res = await pool.query(
+    const res = await pool.execute<ResultSetHeader>(
         "INSERT INTO meter_anomalies (jdoc) VALUES (?)",
         [JSON.stringify(jdoc)]
     );
     return res[0].insertId;
 }
 export async function getAnomaly(id: number) {
-    const res = await pool.query(
+    const [res] = await pool.query<{jdoc: MeterAnomaly}[] & RowDataPacket[]>(
         "SELECT jdoc FROM meter_anomalies WHERE id = ?",
         [id]
     );
-    return res.rows[0].jdoc;
+    return res[0].jdoc;
 }
 

@@ -1,7 +1,7 @@
 // handler.ts
 import axios from "axios";
 import { Lambda, SNS } from "aws-sdk";
-import Redis from "ioredis";
+import * as db from "../tslib/anomalyDB"
 
 const API_KEY: string | undefined = process.env.EMCS_API_KEY;
 const SECRET_TOKEN: string | undefined = process.env.SECRET_TOKEN;
@@ -10,11 +10,17 @@ const REPORT_URL: string = "https://portal.emcs.cornell.edu/d/broken_meter_ticke
 
 
 // when running offline, use the localhost endpoint
+let endpoint = "https://lambda.us-east-1.amazonaws.com",
+    sslEnabled = true;
+if (process.env.IS_OFFLINE) {
+    endpoint = "http://localhost:3001";
+    sslEnabled = false;
+}
+console.log(`IS_OFFLINE: ${process.env.IS_OFFLINE} Using endpoint ${endpoint}`)
 const lambda = new Lambda({
     apiVersion: "2015-03-31",
-    endpoint: process.env.IS_OFFLINE
-        ? "http://localhost:3002"
-        : "https://lambda.us-east-1.amazonaws.com",
+    endpoint,
+    sslEnabled
 });
 
 // forms the URL for the EMCS API that returns the json representation of an object
@@ -80,10 +86,12 @@ export async function invokeLambda(
         const response: Lambda.InvocationResponse = await lambda
             .invoke(params)
             .promise();
+        console.log("got response ", JSON.stringify(response))
         const responseBody = JSON.parse("" + response.Payload?.toString());
-        return responseBody.body;
+        console.log("returning responseBody", responseBody);
+        return responseBody;
     } catch (error) {
-        return `AWS error invoking lambda: ${error.message}`;
+        return {"error": `AWS error invoking lambda: ${error.message}`};
     }
 }
 
@@ -94,18 +102,12 @@ export async function run(event, context) {
     const time = new Date();
     console.log(`Handler ran at ${time}`);
     // see https://github.com/luin/ioredis#special-note-aws-elasticache-clusters-with-tls
-    const redis = new Redis.Cluster([{
-        port: 6379,
-        host: "clustercfg.emcs-redis-auth.asuq5x.use1.cache.amazonaws.com",
-    }], {
-        dnsLookup: (address, cbk) => cbk(null, address),
-        redisOptions: {
-            tls: {},
-            username: "cn",
-            password: "cfYRp36reQ9dNqOMmZ4Laj0w",
-            db: 0,
-        }
-    });
+
+    // get a list of known open anomalies
+    const anomalyList = await db.getAnomalies();
+    const knownAnomalies = Object.fromEntries(
+        anomalyList.map((a) => [`${a.algorithm}:${a.point}`, a])
+    );
 
     // create a (flattened) list of invokeLambda parameters for all of the configured algorithms
     const lambdaParams = (
@@ -129,34 +131,37 @@ export async function run(event, context) {
                 param.pointName
             );
             const invokeKey = `${param.uri}:${param.pointName}`;
-            if (lambdaResult) {
-                // update elasicache state if necessary; remember when the anomaly was first detected
+            if (Object.keys(lambdaResult).length > 0) {
+                // anomaly detected; store it
                 const ts = time.getTime();
-                const hsetResult = await redis.hsetnx(
-                    "meter-anomalies",
-                    invokeKey,
-                    ts
-                )
-
-                if ( hsetResult ) {
-                    // prepend the function name to the results to be consistent
-                    return `${invokeKey} ${lambdaResult}`;
+                const anomaly: MeterAnomaly = {
+                    ...lambdaResult,
+                    point: param.pointName,
+                    algorithm: param.uri
+                };
+                const anomID = await db.addAnomaly(anomaly);
+                console.log("added anomaly", anomID)
+                // check if this is a known anomaly
+                if (invokeKey in knownAnomalies) {
+                    return null;
+                }
+                else{
+                    return anomaly;
                 }
             } else {
                 // clear anomaly
-                await redis.hdel("meter-anomalies", invokeKey);
+                await db.clearAllAnomalies(param.uri, param.pointName);
             }
             return null;
         })
     );
-    await redis.quit();
     //make the report
     const report = results
         .filter((r) => r.status != "fulfilled" || r.value) // only results with errors or responses
         .map((r) => {
             // get the value or the reason
             if (r.status == "fulfilled") {
-                return r.value;
+                return JSON.stringify(r.value);
             } else {
                 // rejected
                 return r.reason;

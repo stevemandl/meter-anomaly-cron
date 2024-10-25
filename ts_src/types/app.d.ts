@@ -9,13 +9,13 @@ type MeterAnomaly = {
     point: string,
     algorithm: string,
     anomaly_ts: DateISO,
-    clear_ts: DateISO,
-    other_points: string[],
-    calculated_score: number,
-    anomaly_threshold_score: number,
-    descscription: string,
-    start_ts: DateISO,
-    end_ts: DateISO,
+    clear_ts?: DateISO,
+    other_points?: string[],
+    calculated_score?: number,
+    anomaly_threshold_score?: number,
+    descscription?: string,
+    start_ts?: DateISO,
+    end_ts?: DateISO,
 };
 
 type Algorithm = (event: {

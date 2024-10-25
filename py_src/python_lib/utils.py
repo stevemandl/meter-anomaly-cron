@@ -3,17 +3,59 @@
 
 import os
 from datetime import datetime
+from typing import List
 from dateutil import parser
 import requests
 import numpy as np
 import pandas as pd
 
+
 # globals
 PORTAL_API_URL = os.environ.get("PORTAL_API_URL", "/")
 QUERY_URL = f"{PORTAL_API_URL}query"
 
+
 class AnomalyError(Exception):
     "Anomaly Exception class"
+
+
+class MeterAnomaly(dict):
+    """Class for encapsulating the discovery of an anomaly.
+    Timestamps are in ISO8501 format."""
+    def __init__(
+        self,
+        point: str,
+        algorithm: str,
+        anomaly_ts: str,
+        description: str = None,
+        calculated_score: float = None,
+        anomaly_threshold_score: float = None,
+        start_ts: str = None,
+        end_ts: str = None,
+        other_points: List[str] = None,
+        clear_ts: str = None,
+        **kwargs,
+    ):
+        my_args = {
+            "point": point,
+            "algorithm": algorithm,
+            "anomaly_ts": anomaly_ts}
+        if description is not None:
+            my_args["description"] = description
+        if calculated_score is not None:
+            my_args["calculated_score"] = calculated_score
+        if anomaly_threshold_score is not None:
+            my_args["anomaly_threshold_score"] = anomaly_threshold_score
+        if start_ts is not None:
+            my_args["start_ts"] = start_ts
+        if end_ts is not None:
+            my_args["end_ts"] = end_ts
+        if other_points is not None:
+            my_args["other_points"] = other_points
+        if clear_ts is not None:
+            my_args["clear_ts"] = clear_ts
+        super(MeterAnomaly, self).__init__(**my_args, **kwargs)
+
 
 def parse_event(event):
     """
@@ -34,13 +76,16 @@ def parse_event(event):
         else:
             if type(ts) is int or type(ts) is float:
                 body["timeStamp"] = datetime.fromtimestamp(float(ts))
-            else: raise RuntimeError("invalid timeStamp")
+            else:
+                raise RuntimeError("invalid timeStamp")
     else:
         body["timeStamp"] = datetime.now()
     return body
 
 
-def fetch_trends(point=None, points=None, start_time=None, end_time=datetime.now(), additional=[]):
+def fetch_trends(
+    point=None, points=None, start_time=None, end_time=datetime.now(), additional=[]
+):
     """Returns trend response(s) for all of the points provided in the time range specified
     :param string point: cannot be provided with points
     :param list points: cannot be provided with point
@@ -67,23 +112,25 @@ def fetch_trends(point=None, points=None, start_time=None, end_time=datetime.now
 
     return raw_response.json()
 
+
 def build_index(response):
     """
     Returns a dict with target names as indexes to dictionaries of data values indexed by their timestamps
     :expects a trend response in the format returned by the fetch_trends function
     :param empty response returns an empty dict
-    
+
     """
     index = {}
-    for (_, entry) in enumerate(response):
-        data= {}
-        for (_, time) in enumerate(entry["datapoints"]):
+    for _, entry in enumerate(response):
+        data = {}
+        for _, time in enumerate(entry["datapoints"]):
             data[time[1]] = time[0]
-            index.update({entry["target"]:data})
-    return(index)
+            index.update({entry["target"]: data})
+    return index
 
-def build_df(response, interpolate = True):
-    """ 
+
+def build_df(response, interpolate=True):
+    """
     converts response to dataframe
     keyword arguments:
     response - a trend response like one returned by fetch_trends()
@@ -94,12 +141,12 @@ def build_df(response, interpolate = True):
         a = np.array(t["datapoints"])
         if a.size == 0:
             continue
-        t_df = pd.DataFrame.from_records(a, columns = (t["target"], "ts"), index="ts")
+        t_df = pd.DataFrame.from_records(a, columns=(t["target"], "ts"), index="ts")
         if df.empty:
             df = t_df
         else:
             df = df.merge(t_df, how="outer", on="ts")
-    df.index = pd.to_datetime(df.index, unit='ms')
+    df.index = pd.to_datetime(df.index, unit="ms")
     if interpolate:
         return df.interpolate()
     return df

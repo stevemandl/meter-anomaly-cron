@@ -12,6 +12,14 @@ Parameters:
     Type: String
   APIURLParameter:
     Type: String
+  TRENDDBHOSTParameter:
+    Type: String
+  TRENDDBParameter:
+    Type: String
+  TRENDDBPASSWORDParameter:
+    Type: String
+  TRENDDBUSERParameter:
+    Type: String
 Resources:  
   MeterAnomalyTS:
     Type: AWS::Serverless::Application
@@ -21,6 +29,10 @@ Resources:
         EMCSAPIKEYParameter: !Ref EMCSAPIKEYParameter
         StageParameter: !Ref StageParameter
         APIURLParameter: !Ref APIURLParameter
+        TRENDDBHOSTParameter: !Ref TRENDDBHOSTParameter
+        TRENDDBParameter: !Ref TRENDDBParameter
+        TRENDDBPASSWORDParameter: !Ref TRENDDBPASSWORDParameter
+        TRENDDBUSERParameter: !Ref TRENDDBUSERParameter
   MeterAnomalyPY:
     Type: AWS::Serverless::Application
     Properties:

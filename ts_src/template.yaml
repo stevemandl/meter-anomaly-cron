@@ -20,7 +20,17 @@ Parameters:
     Type: String
   APIURLParameter:
     Type: String
-
+  TRENDDBHOSTParameter:
+    Type: String
+  TRENDDBParameter:
+    Type: String
+  TRENDDBPASSWORDParameter:
+    Type: String
+  TRENDDBUSERParameter:
+    Type: String
+  ISOFFLINEParameter:
+    Type: String
+    Default: ''
 Resources:  
   CronHandler:
     Type: AWS::Serverless::Function
@@ -39,6 +49,11 @@ Resources:
           EMCS_API_KEY: !Ref EMCSAPIKEYParameter
           SAM_STAGE: !Ref StageParameter
           API_URL: !Ref APIURLParameter
+          TRENDDB_HOST: !Ref TRENDDBHOSTParameter
+          TRENDDB: !Ref TRENDDBParameter
+          TRENDDB_PASSWORD: !Ref TRENDDBPASSWORDParameter
+          TRENDDB_USER: !Ref TRENDDBUSERParameter
+          IS_OFFLINE: !Ref ISOFFLINEParameter
       VpcConfig:
         SecurityGroupIds:
           - sg-e622fc9e
