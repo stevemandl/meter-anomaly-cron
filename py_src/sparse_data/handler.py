@@ -1,7 +1,7 @@
 # sparse_data/handler.py
-from datetime import timedelta, datetime
+from datetime import timedelta
 from requests.exceptions import ConnectionError as RequestConnectionError, HTTPError
-from python_lib.utils import parse_event, fetch_trends, MeterAnomaly
+from python_lib.utils import parse_event, fetch_trends, MeterAnomaly, now
 
 # the minimum acceptable length of the datapoints array
 MIN_DATAPOINTS_LENGTH = int(30 * 24 * 0.9)
@@ -15,7 +15,7 @@ def run(event, _context):
     payload = {}
     # parse event and ensure timeStamp and pointName are present
     params = parse_event(event)
-    print(f"sparse_data handler run with params {params}")
+    print(f"{ALGORITHM} handler run with params {params}")
     end_time = params.get("timeStamp")
     start_time = end_time - timedelta(30)
     point_name = params.get("pointName")
@@ -33,7 +33,7 @@ def run(event, _context):
                 payload = MeterAnomaly(
                     point_name,
                     ALGORITHM,
-                    datetime.now().isoformat(),
+                    now().isoformat(),
                     desc,
                     len(trend_response[0]["datapoints"]),
                     MIN_DATAPOINTS_LENGTH,
@@ -44,7 +44,7 @@ def run(event, _context):
             payload = MeterAnomaly(
                 point_name,
                 ALGORITHM,
-                datetime.now().isoformat(),
+                now().isoformat(),
                 "unexpected error: missing response list for the period",
                 start_ts=start_time.isoformat(),
                 end_ts=end_time.isoformat(),
@@ -59,7 +59,7 @@ def run(event, _context):
                     payload = MeterAnomaly(
                         point_name,
                         ALGORITHM,
-                        datetime.now().isoformat(),
+                        now().isoformat(),
                         "No data for the period.",
                         0,
                         MIN_DATAPOINTS_LENGTH,

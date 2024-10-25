@@ -3,6 +3,7 @@
 
 import os
 from datetime import datetime
+import pytz
 from typing import List
 from dateutil import parser
 import requests
@@ -56,6 +57,8 @@ class MeterAnomaly(dict):
             my_args["clear_ts"] = clear_ts
         super(MeterAnomaly, self).__init__(**my_args, **kwargs)
 
+def now():
+    return datetime.now(tz=pytz.timezone('US/Eastern'))
 
 def parse_event(event):
     """
@@ -79,12 +82,12 @@ def parse_event(event):
             else:
                 raise RuntimeError("invalid timeStamp")
     else:
-        body["timeStamp"] = datetime.now()
+        body["timeStamp"] = now()
     return body
 
 
 def fetch_trends(
-    point=None, points=None, start_time=None, end_time=datetime.now(), additional=[]
+    point=None, points=None, start_time=None, end_time=now(), additional=[]
 ):
     """Returns trend response(s) for all of the points provided in the time range specified
     :param string point: cannot be provided with points
