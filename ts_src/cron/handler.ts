@@ -22,6 +22,7 @@ const lambda = new Lambda({
     endpoint,
     sslEnabled
 });
+const sns = new SNS({ apiVersion: "2010-03-31", endpoint, sslEnabled });
 
 // forms the URL for the EMCS API that returns the json representation of an object
 function emcsURL(point: string) {
@@ -59,15 +60,20 @@ const algorithms: AlgorithmCfg[] = [
 // returns a list of point names for the Algorithm
 export async function fetchPoints(cfg: AlgorithmCfg): Promise<string[]> {
     const URL = emcsURL(cfg.objListPoint);
-    const { data } = await axios.get<ObjList>(URL);
-    // EMCS API responses are text/plain ,so we need to manually
-    // convert single quotes to double, then parse
-    console.log(`EMCS url ${URL} returned object list: ${data.objectList}`);
-    if (data.objectList){
-        const objArray: string[] = JSON.parse(data.objectList.replace(/'/g, '"'));
-        return objArray;
+    try{
+        const { data } = await axios.get<ObjList>(URL)
+        // EMCS API responses are text/plain ,so we need to manually
+        // convert single quotes to double, then parse
+        console.log(`EMCS url ${URL} returned object list: ${data.objectList}`);
+        if (data.objectList){
+            const objArray: string[] = JSON.parse(data.objectList.replace(/'/g, '"'));
+            return objArray;
+        }
     }
-    else return [];
+    catch(err) {
+        console.error(`Error fetching ${URL}: ${err.message}`);
+    }
+    return [];
 }
 
 // invokeLambda()
@@ -181,8 +187,6 @@ export async function run(event, context) {
             Message,
             TopicArn: "arn:aws:sns:us-east-1:498547149247:emcs-meter-anomalies",
         };
-        // create SNS service object
-        const sns = new SNS({ apiVersion: "2010-03-31" });
         // Await promise
         var publishText = await sns.publish(params).promise();
         // Handle promise's fulfilled/rejected states
