@@ -59,8 +59,10 @@ def test_nobarf(mocker):
     )
     
     result = run(event, None)
-    assert "statusCode" in result
-    assert "missing more than 10%" in result.get("body")
+    assert "point" in result
+    assert "description" in result
+    assert "Missing more than 10%" in result["description"]
+
 
 
 def test_handle400(mocker):
@@ -72,9 +74,8 @@ def test_handle400(mocker):
     )
     event = {"body": {"pointName": "foo"}}
     result = run(event, None)
-    assert "statusCode" in result
-    assert "no data" in result.get("body")
-
+    assert "No data" in result["description"]
+    
 
 def test_barf(mocker):
     r = Response()
@@ -85,8 +86,7 @@ def test_barf(mocker):
     )
     event = {"body": {"pointName": "foo"}}
     result = run(event, None)
-    assert "statusCode" in result
-    assert "qwerty" in result.get("body")
+    assert "qwerty" in result["error"]
 
 
 
@@ -104,8 +104,7 @@ def test_actual(mocker):
         return_value= data,
     )
     result = run(event, None)
-    assert "statusCode" in result
-    assert "missing more than 10%" in result.get("body")
+    assert "Missing more than 10%" in result["description"]
 
 def test_noanomly(mocker):
     event = {
@@ -120,5 +119,4 @@ def test_noanomly(mocker):
         return_value = data,
     )
     result = run(event, None)
-    assert "statusCode" in result
-    assert "" == result.get("body")
+    assert not result

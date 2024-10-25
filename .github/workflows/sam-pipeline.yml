@@ -20,6 +20,10 @@ jobs:
           sam build
           --use-container
           --container-env-var EMCS_API_KEY=${{ secrets.EMCS_API_KEY }}
+          --container-env-var TRENDDB_HOST=${{ secrets.TRENDDB_HOST }}
+          --container-env-var TRENDDB_USER=${{ secrets.TRENDDB_USER }}
+          --container-env-var TRENDDB_PASSWORD=${{ secrets.TRENDDB_PASSWORD }}
+          --container-env-var TRENDDB=${{ secrets.TRENDDB }}
           --container-env-var SAM_STAGE=$GITHUB_REF_NAME
           --container-env-var PORTAL_API_URL='https://portal-api.emcs.cucloud.net/'
 

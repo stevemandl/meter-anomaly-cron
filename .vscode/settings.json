@@ -1,0 +1,11 @@
+{
+    "python.testing.pytestArgs": [
+        "py_src"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "pylint.args": [
+        "--rcfile",
+        "${workspaceRoot}/.pylintrc"
+    ]
+}

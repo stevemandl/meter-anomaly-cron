@@ -128,6 +128,20 @@ REPORT RequestId: 9c8e272c-4ba1-402a-bd05-4acb9546b0b0  Init Duration: 0.03 ms  
 ```
 The body of the response should contain the anomaly description, if detected, or an empty string if no anomaly is detected.
 
+### Local lambda endpoint
+To start a local endpoint that emulates Lambda, use a command similar to the following:
+see https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/using-sam-cli-local-start-lambda.html
+```
+sam local start-lambda
+```
+after starting, you should be able to invoke locally by modifying the endpoint url:
+```
+aws lambda invoke --function-name "MeterAnomalyPY/SparseData" --payload fileb://events/NoyesElec.json --endpoint-url "http://127.0.0.1:3001" --no-verify-ssl out.txt
+{
+    "StatusCode": 200
+}
+```
+
 ### Project directory structure
 The project is organized by programming language: py_src/ contains python source code and ts_src/ contains typescript.
 

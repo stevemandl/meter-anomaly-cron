@@ -161,3 +161,26 @@ def test_noanom(mocker):
     result = run(event, None)
     assert "statusCode" in result
     assert "" == result.get("body") 
+
+def test_http_error_400_no_data(mocker):
+    event = {
+        "body": {
+            "pointName": "TestPoint",
+            "timeStamp": "2023-07-30",
+        }
+    }
+    
+    # Create a mock Response object
+    mock_response = Response()
+    mock_response.status_code = 400
+    mock_response._content = b'{"error": "No data"}'
+    
+    # Mock the fetch_trends function to raise an HTTPError
+    mocker.patch(
+        "long_term_variance.handler.fetch_trends",
+        side_effect=HTTPError(response=mock_response)
+    )
+    
+    result = run(event, None)
+    assert "statusCode" in result
+    assert "TestPoint has no data" in result.get("body")

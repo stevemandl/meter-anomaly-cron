@@ -1,25 +1,25 @@
 """
- same_value/handler.py
+ stuck_two_day/handler.py
 """
 
 from datetime import timedelta
 from requests.exceptions import ConnectionError as RequestConnectionError, HTTPError
 
-from python_lib.utils import parse_event, fetch_trends
+from python_lib.utils import parse_event, fetch_trends, MeterAnomaly, now
 
 # the minimum acceptable length of the datapoints array
 MIN_DATAPOINTS_LENGTH = 100
-
+ALGORITHM="stuck_two_day"
 
 def run(event, _context):
     """
     handler.run - the lambda function entry point
     """
-    # start out with blank response
-    response = {"statusCode": 200, "body": ""}
+    # start out with blank payload
+    payload = {}
     # parse event and ensure timeStamp and pointName are present
     params = parse_event(event)
-    print(f"Same_value_algorithm handler run with params {params}")
+    print(f"{ALGORITHM} handler run with params {params}")
     end_time = params.get("timeStamp")
     start_time = end_time - timedelta(7)
     point_name = params.get("pointName")
@@ -36,28 +36,43 @@ def run(event, _context):
             if len(datapoints) > MIN_DATAPOINTS_LENGTH:
                 values = [p[0] for p in datapoints]
                 if all(p == values[0] for p in values):
-                    response[
-                        "body"
-                    ] = f"""{point_name} is stuck at value {values[0]} 
-                    for the period {start_time:%Y-%m-%d %H:%M} to {end_time:%Y-%m-%d %H:%M}"""
+                    desc = f"Stuck at value {values[0]}"
+                    payload = MeterAnomaly(
+                        point_name,
+                        ALGORITHM,
+                        now().isoformat(),
+                        desc,
+                        len(trend_response[0]["datapoints"]),
+                        MIN_DATAPOINTS_LENGTH,
+                        start_time.isoformat(),
+                        end_time.isoformat(),
+                    )
         else:  # response should always be a list
-            response["body"] = (
-                f"{point_name} unexpected error: missing response list for the period {start_time:%Y-%m-%d %H:%M} to {end_time:%Y-%m-%d %H:%M}"
+            payload = MeterAnomaly(
+                point_name,
+                ALGORITHM,
+                now().isoformat(),
+                "unexpected error: missing response list for the period",
+                start_ts=start_time.isoformat(),
+                end_ts=end_time.isoformat(),
             )
     except RequestConnectionError as err:
-        response["body"] = (
-            f"{point_name} ConnectionError: {err.response.text} {start_time:%Y-%m-%d %H:%M} to {end_time:%Y-%m-%d %H:%M}"
-        )
+        payload["error"] = err.response.text
     except HTTPError as err:
-        response["body"] = (
-            f"{point_name} {err.response.text} for the period {start_time:%Y-%m-%d %H:%M} to {end_time:%Y-%m-%d %H:%M}"
-        )
+        payload["error"] = err.response.text
         if err.response.status_code == 400:
             try:  # have to try decoding json
                 if err.response.json()["error"] == "No data":
-                    response["body"] = (
-                        f"{point_name} has no data for the period {start_time:%Y-%m-%d %H:%M} to {end_time:%Y-%m-%d %H:%M}"
+                    payload = MeterAnomaly(
+                        point_name,
+                        ALGORITHM,
+                        now().isoformat(),
+                        "No data for the period.",
+                        0,
+                        MIN_DATAPOINTS_LENGTH,
+                        start_time.isoformat(),
+                        end_time.isoformat(),
                     )
             except ValueError:
                 pass
-    return response
+    return payload
