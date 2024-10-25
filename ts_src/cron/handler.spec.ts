@@ -6,12 +6,13 @@ import { run, invokeLambda, fetchPoints } from "./handler";
 
 jest.mock("axios");
 const mockedAxios = jest.mocked(axios);
+const resp = { data: "test123" };
 jest.mock("aws-sdk", () => {
   const mLambda = {
     invoke: jest.fn(() => {
       return {
         promise: jest.fn(() => {
-          return { Payload: '{"body":{"data": "test123"}}' };
+          return { Payload: JSON.stringify(resp) };
         }),
       };
     }),
@@ -38,13 +39,13 @@ describe("root handler testing", () => {
   });
 
   test("invokeLambda works", async () => {
-    const resp = { data: "test123" };
 
-    const lambdaResult = await invokeLambda("foo", "bar");
+    const lambdaResult = await invokeLambda("foo", "bar", "biff");
     expect(lambdaResult).toStrictEqual(resp);
     expect(Lambda).toBeCalledWith({
       apiVersion: "2015-03-31",
       endpoint: "https://lambda.us-east-1.amazonaws.com",
+      sslEnabled: true,
     });
   });
 });
