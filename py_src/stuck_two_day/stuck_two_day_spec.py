@@ -66,7 +66,7 @@ def test_handle400(mocker):
     )
     event = {"body": {"pointName": "foo"}}
     result = run(event, None)
-    assert "No data" in result["description"]
+    assert not result
 
 
 def test_barf(mocker):

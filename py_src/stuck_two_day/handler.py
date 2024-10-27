@@ -63,16 +63,7 @@ def run(event, _context):
         if err.response.status_code == 400:
             try:  # have to try decoding json
                 if err.response.json()["error"] == "No data":
-                    payload = MeterAnomaly(
-                        point_name,
-                        ALGORITHM,
-                        now().isoformat(),
-                        "No data for the period.",
-                        0,
-                        MIN_DATAPOINTS_LENGTH,
-                        start_time.isoformat(),
-                        end_time.isoformat(),
-                    )
+                    payload = {}
             except ValueError:
                 pass
     return payload
