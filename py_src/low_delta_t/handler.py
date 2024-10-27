@@ -62,7 +62,9 @@ def run(event, _context):
         model_df["DT_PRED"] =  (model_df["PLR"] ** 0.173) * (model_df["PT"] ** 0.067) * 15.603
         # compare actual delta-t with modeled normal, and detect anomaly if it falls below model by more than variance
         actual_dt = np.mean(model_df[rtemp_name] - model_df[stemp_name])
-        weighted_actual_dt = np.average(model_df[rtemp_name] - model_df[stemp_name], weights=model_df[flow_name])
+        weighted_actual_dt = None
+        if np.sum(model_df[flow_name]) > 0:
+            weighted_actual_dt = np.average(model_df[rtemp_name] - model_df[stemp_name], weights=model_df[flow_name])
         model_dt = np.mean(model_df["DT_PRED"])
         weighted_model_dt = np.average(model_df["DT_PRED"], weights=model_df[flow_name])
         if actual_dt < model_dt * ANOMALY_THRESHOLD:
