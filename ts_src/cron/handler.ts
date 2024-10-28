@@ -138,19 +138,18 @@ export async function run(event, context) {
             const invokeKey = `${param.uri}:${param.pointName}`;
             if (Object.keys(lambdaResult).length > 0) {
                 // anomaly detected; store it
-                const ts = time.getTime();
-                const anomaly: MeterAnomaly = {
-                    ...lambdaResult,
-                    point: param.pointName,
-                    algorithm: param.uri
-                };
-                const anomID = await db.addAnomaly(anomaly);
-                console.log("added anomaly", anomID)
                 // check if this is a known anomaly
                 if (invokeKey in knownAnomalies) {
                     return null;
                 }
                 else{
+                    const anomaly: MeterAnomaly = {
+                        ...lambdaResult,
+                        point: param.pointName,
+                        algorithm: param.uri
+                    };
+                    const anomID = await db.addAnomaly(anomaly);
+                    console.log("added anomaly", anomID)
                     return anomaly;
                 }
             } else {
